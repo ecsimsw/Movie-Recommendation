@@ -165,10 +165,45 @@ def filter_language(search_line, compare_set):
     
     return new_compare_set
 
+def filter_series(search_line, compare_set):
+    search_series = get_series_by_line(search_line)
+
+    if search_series != []:   
+        new_compare_set = [] 
+        for line in compare_set:
+            compare_series = get_series_by_line(line)
+            if isExist(search_series,compare_series):
+                new_compare_set.append(line)
+        return new_compare_set
+    
+    else:
+        return compare_set    
+
+def score_set_genre(search_line, compare_set):
+    search_genre = get_genres_by_line(search_line)
+
+    score_set = []
+    for line in compare_set:
+        score = 0
+        compare_genre = get_genres_by_line(line)
+        for sg in search_genre:
+            for cg in compare_genre:
+                if sg==cg:
+                    score += 1
+        score_set.append(score)
+
+    return score_set
+
 index = input("search movie index : ")
 
 search_line = data_file[int(index)]
 
-filtered = filter_language(search_line, data_file)
+#filtered = filter_language(search_line, data_file)
 
-print(get_languages_by_set(filtered))
+#filtered = filter_series(search_line, data_file)
+
+score_set = score_set_genre(search_line, data_file)
+
+print_list(score_set)
+
+
