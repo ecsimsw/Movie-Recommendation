@@ -13,7 +13,7 @@
 11. poster
 12. production company
 13. production lan
-14. ##
+14. release
 16. revenue
 17. runtime
 18. spoken lan
@@ -49,8 +49,7 @@ data_hash ={
     'title':20,
     'video':21,
     'vote_ave':22,
-    'vote_cnt':23
-}
+    'vote_cnt':23 }
 
 import csv
 data_file =[]
@@ -60,6 +59,10 @@ with open("C:/Users/user/Desktop/data/test.csv", mode='r', encoding='utf8', erro
     for i in csv:
         data_file.append(i)
         #print(i[3].split('}, {'))
+
+def print_list(list_):
+    for line in list_:
+        print(line)
 
 def find_value_tag(string, char_tag, pad_lan, char_last= None, data_lan =None):
     value = []
@@ -89,35 +92,83 @@ def find_value_tag(string, char_tag, pad_lan, char_last= None, data_lan =None):
 
     return value
 
-def get_genres(predict_set):
+def get_genres_by_line(line):
+    return find_value_tag(line[data_hash['genres']], 'id', 3, char_last=',')
+
+def get_series_by_line(line):
+    return find_value_tag(line[data_hash['series']], 'id', 3, char_last=',')
+
+def get_languages_by_line(line):
+    return find_value_tag(line[data_hash['spoken_language']], 'iso_639_1', pad_lan=4, data_lan=2)
+
+def get_company_by_line(line):
+    return find_value_tag(line[data_hash['production_company']], 'id', pad_lan=3, char_last='}')
+
+def get_vote_ave_by_line(line):
+    return line[data_hash['vote_ave']]
+
+def get_vote_cnt_by_line(line):
+    return line[data_hash['vote_cnt']]
+
+def get_genres_by_set(predict_set):
     genre_list = []
     for i in predict_set:
-        genre_list.append(find_value_tag(i[data_hash['genres']], 'id', 3, char_last=','))
+        genre_list.append(get_genres_by_line(i))
     return genre_list
 
-def get_series(predict_set):
+def get_series_by_set(predict_set):
     series_list = []
     for i in predict_set:
-        series_list.append(find_value_tag(i[data_hash['series']], 'id', 3, char_last=','))
+        series_list.append(get_series_by_line(i))
     return series_list
 
-def get_languages(predict_set):
+def get_languages_by_set(predict_set):
     series_list = []
     for i in predict_set:
-        series_list.append(find_value_tag(i[data_hash['spoken_language']], 'iso_639_1', pad_lan=4, data_lan=2))
+        series_list.append(get_languages_by_line(i))
     return series_list
 
-def get_company(predict_set):
+def get_company_by_set(predict_set):
     company_list = []
     for i in predict_set:
-        company_list.append(find_value_tag(i[data_hash['production_company']], 'id', pad_lan=3, char_last='}'))
+        company_list.append(get_company_by_line(i))
     return company_list
 
-def get_vote_ave(predict_set):
-    company_list = []
+def get_vote_ave_by_set(predict_set):
+    vote_ave = []
     for i in predict_set:
-        company_list.append(find_value_tag(i[data_hash['vote_ave']])
-    return company_list
+        vote_ave.append(get_vote_ave_by_line(i))
+    return vote_ave
 
-print(get_genres(data_file))
+def get_vote_cnt_by_set(predict_set):
+    vote_cnt = []
+    for i in predict_set:
+        vote_cnt.append(get_vote_cnt_by_line(i))
+    return vote_cnt
 
+def isExist(main_set, compare_set):
+    for feature in main_set:
+        for c in compare_set:
+            if feature==c:
+                return True
+    
+    return False
+
+def filter_language(search_line, compare_set):
+    search_language = get_languages_by_line(search_line)
+
+    new_compare_set = [] 
+    for line in compare_set:
+        compare_language = get_languages_by_line(line)
+        if isExist(search_language,compare_language):
+            new_compare_set.append(line)
+    
+    return new_compare_set
+
+index = input("search movie index : ")
+
+search_line = data_file[int(index)]
+
+filtered = filter_language(search_line, data_file)
+
+print(get_languages_by_set(filtered))
