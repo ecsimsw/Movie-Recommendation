@@ -62,7 +62,7 @@ with open("C:/Users/user/Desktop/data/test.csv", mode='r', encoding='utf8', erro
 
 def print_list(list_):
     for line in list_:
-        print(line)
+        print(line,'\n')
 
 def find_value_tag(string, char_tag, pad_lan, char_last= None, data_lan =None):
     value = []
@@ -154,7 +154,12 @@ def isExist(main_set, compare_set):
     
     return False
 
-def filter_language(search_line, compare_set):
+def sub_list(pre, post):
+    for p in post:
+        pre.remove(p)
+    return pre
+
+def same_language(search_line, compare_set):
     search_language = get_languages_by_line(search_line)
 
     new_compare_set = [] 
@@ -165,21 +170,21 @@ def filter_language(search_line, compare_set):
     
     return new_compare_set
 
-def filter_series(search_line, compare_set):
+def same_series(search_line, compare_set):
     search_series = get_series_by_line(search_line)
 
     if search_series != []:   
-        new_compare_set = [] 
+        same_series_set = [] 
         for line in compare_set:
             compare_series = get_series_by_line(line)
             if isExist(search_series,compare_series):
-                new_compare_set.append(line)
-        return new_compare_set
+                same_series_set.append(line)
+        return same_series_set
     
     else:
         return compare_set    
 
-def score_set_genre(search_line, compare_set):
+def same_genre_score(search_line, compare_set):
     search_genre = get_genres_by_line(search_line)
 
     score_set = []
@@ -194,16 +199,56 @@ def score_set_genre(search_line, compare_set):
 
     return score_set
 
+def stream_filter(search, data_file, n):
+    selected = []
+
+    candidates = data_file
+
+    same_languages_movies = same_language(search,candidates)
+    r = len(same_languages_movies)
+
+    if  r < n:
+        sorted(same_languages_movies, key = lambda x : x[data_hash['vote_ave']], reverse =True)
+        for movie in same_languages_movies:
+            selected.append(movie)
+        n= n-r
+        candidates = sub_list(candidates, same_languages_movies)
+    
+    elif r == n:
+        sorted(same_languages_movies, key = lambda x : x[data_hash['vote_ave']], reverse =True)
+        for movie in same_languages_movies:
+            selected.append(movie)
+        return selected
+
+    else:
+        candidates = same_languages_movies
+
+    same_series_movies = same_series(search, candidates)
+
+    r = len(same_series_movies)
+
+    if  r < n:
+        sorted(same_series_movies, key = lambda x : x[data_hash['vote_ave']], reverse =True)
+        for movie in same_series_movies:
+            selected.append(movie)
+        n= n-r
+        candidates = sub_list(candidates, same_series_movies)
+    
+    elif r == n:
+        sorted(same_series_movies, key = lambda x : x[data_hash['vote_ave']], reverse =True)
+        for movie in same_series_movies:
+            selected.append(movie)
+        return selected
+
+    else:
+        candidates = same_series_movies
+
+    return selected
+
 index = input("search movie index : ")
 
-search_line = data_file[int(index)]
+search_movie = data_file[int(index)]
 
-#filtered = filter_language(search_line, data_file)
-
-#filtered = filter_series(search_line, data_file)
-
-score_set = score_set_genre(search_line, data_file)
-
-print_list(score_set)
+print_list(get_languages_by_set(stream_filter(search_movie, data_file,10)))
 
 
