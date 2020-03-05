@@ -110,37 +110,6 @@ def get_vote_ave_by_line(line):
 def get_vote_cnt_by_line(line):
     return line[data_hash['vote_cnt']]
 
-def get_genres_by_set(predict_set):
-    genre_list = []
-    for i in predict_set:
-        genre_list.append(get_genres_by_line(i))
-    return genre_list
-
-def get_series_by_set(predict_set):
-    series_list = []
-    for i in predict_set:
-        series_list.append(get_series_by_line(i))
-    return series_list
-
-def get_languages_by_set(predict_set):
-    series_list = []
-    for i in predict_set:
-        series_list.append(get_languages_by_line(i))
-    return series_list
-
-def get_company_by_set(predict_set):
-    company_list = []
-    for i in predict_set:
-        company_list.append(get_company_by_line(i))
-    return company_list
-
-def get_vote_ave_by_set(predict_set):
-    vote_ave = []
-    for i in predict_set:
-        vote_ave.append(get_vote_ave_by_line(i))
-    return vote_ave
-
-def get_vote_cnt_by_set(predict_set):
     vote_cnt = []
     for i in predict_set:
         vote_cnt.append(get_vote_cnt_by_line(i))
@@ -199,56 +168,126 @@ def same_genre_score(search_line, compare_set):
 
     return score_set
 
+def filt(same_movies, candidates, n, selected):
+    r = len(same_movies)
+
+    if  r < n:
+        sorted(same_movies, key = lambda x : x[data_hash['vote_ave']], reverse =True)
+        for movie in same_movies:
+            selected.append(movie)
+        n= n-r
+        candidates = sub_list(candidates, same_movies)
+    
+    elif r == n:
+        sorted(same_movies, key = lambda x : x[data_hash['vote_ave']], reverse =True)
+        for movie in same_movies:
+            selected.append(movie)
+        return None,0
+
+    else:
+        candidates = same_movies
+
+    return candidates,n
+
+def filt_genre(search, candidates, n, selected):
+    genre_score = same_genre_score(search, candidates)
+    max_score = max(genre_score)
+    
+    dif_score=0
+    while(True):
+        exprected_score = max_score - dif_score
+       
+        if exprected_score ==0:
+            return candidates,n
+        
+        r = genre_score.count(exprected_score)
+        
+        index_list = []
+        lines_list = [] 
+
+        for index, value in enumerate(genre_score):
+            if value == exprected_score:
+                index_list.append(index)
+
+        for index in index_list:
+            lines_list.append(candidates[index])
+
+        if r < n :
+            sorted(lines_list, key = lambda x : x[data_hash['vote_ave']], reverse =True)
+            for movie in lines_list:
+                selected.append(movie)
+            n = n-r
+            dif_score+=1
+        
+        elif r == n :
+            sorted(lines_list, key = lambda x : x[data_hash['vote_ave']], reverse =True)
+            for movie in lines_list:
+                selected.append(movie)
+            return None,0
+
+        else:
+            candidates = lines_list
+            return candidates, n
+
 def stream_filter(search, data_file, n):
     selected = []
 
-    candidates = data_file
+    search_list = []
+    search_list.append(search)
+    
+    candidates = sub_list(data_file, search_list)
+    
+    print("number of data : ", len(candidates))
+
+    ## filter same language 
 
     same_languages_movies = same_language(search,candidates)
-    r = len(same_languages_movies)
-
-    if  r < n:
-        sorted(same_languages_movies, key = lambda x : x[data_hash['vote_ave']], reverse =True)
-        for movie in same_languages_movies:
-            selected.append(movie)
-        n= n-r
-        candidates = sub_list(candidates, same_languages_movies)
+    candidates,n = filt(same_languages_movies, candidates, n, selected)
+    same_language_cnt = len(candidates)
     
-    elif r == n:
-        sorted(same_languages_movies, key = lambda x : x[data_hash['vote_ave']], reverse =True)
-        for movie in same_languages_movies:
-            selected.append(movie)
-        return selected
-
+    if n == 0:
+        print("selecting complete")
+        return selected,0 
     else:
-        candidates = same_languages_movies
+        print("number of same languages : ", same_language_cnt)
+
+    ## find same series
 
     same_series_movies = same_series(search, candidates)
-
-    r = len(same_series_movies)
-
-    if  r < n:
-        sorted(same_series_movies, key = lambda x : x[data_hash['vote_ave']], reverse =True)
-        for movie in same_series_movies:
-            selected.append(movie)
-        n= n-r
-        candidates = sub_list(candidates, same_series_movies)
+    candidates,n = filt(same_series_movies, candidates, n, selected)
     
-    elif r == n:
-        sorted(same_series_movies, key = lambda x : x[data_hash['vote_ave']], reverse =True)
-        for movie in same_series_movies:
-            selected.append(movie)
-        return selected
+    n_series_cnt = len(candidates)
+    same_series_cnt = same_language_cnt - n_series_cnt
+    
+    left_temp = n
 
+    if n == 0:
+        print("selecting complete")
+        return selected,0 
     else:
-        candidates = same_series_movies
+        print("number of same series : ", same_series_cnt)
+        print("left candidates : ", n_series_cnt)
 
-    return selected
+    ## get same genre movies
+
+    candidates, n = filt_genre(search, candidates, n, selected)
+    
+    same_genre_number = left_temp - n
+
+    if n == 0:
+        print("selecting complete")
+        return selected,0 
+    else:
+        print("number of same genre : ", same_genre_number)
+        print("left candidates : ", len(candidates))
+
+    return candidates, n
 
 index = input("search movie index : ")
 
 search_movie = data_file[int(index)]
 
-print_list(get_languages_by_set(stream_filter(search_movie, data_file,10)))
+candidates, selected_n = stream_filter(search_movie,data_file, 10)
 
+print("selected : ",selected_n)
 
