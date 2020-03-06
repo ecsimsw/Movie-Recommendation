@@ -59,6 +59,9 @@ def series(line):
     return find_value_tag(line[data_hash['series']], 'id', 3, char_last=',')
 
 def languages(line):
+    if len(line)-1 < data_hash['spoken_language'] :
+        return ''
+
     return find_value_tag(line[data_hash['spoken_language']], 'iso_639_1', pad_lan=4, data_lan=2)
 
 def company(line):
