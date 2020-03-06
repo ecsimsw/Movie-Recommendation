@@ -57,7 +57,7 @@ data_file =[]
 file_url_D = "C:/Users/luraw/OneDrive/Desktop/data/test.csv"
 file_url_L = "C:/Users/user/Desktop/data/test.csv"
 
-with open(file_url_D, mode='r', encoding='utf8', errors='ignore') as f:
+with open(file_url_L, mode='r', encoding='utf8', errors='ignore') as f:
     csv= csv.reader(f)
     for i in csv:
         data_file.append(i)
@@ -127,7 +127,7 @@ def isExist(main_set, compare_set):
     return False
 
 def sub_list(pre, post):
-    for p in post:
+    for p in post: 
         pre.remove(p)
     return pre
 
@@ -180,14 +180,37 @@ def same_genre_score(search_line, compare_set):
 def sort_by_vote_ave(list2sort):
     return sorted(list2sort, key = lambda x : float(x[data_hash['vote_ave']]), reverse =True)
 
-def filt_language(same_movies, candidates, n, selected):
+def sort_by_genre_score(search, candidates):
+    gs_list = same_genre_score(search,candidates)
+
+    temp_for_sort = []
+    for index, value in enumerate(gs_list):
+        temp_for_sort.append(list([index,value]))
+
+    order = sorted(temp_for_sort, key = lambda x : x[1], reverse =True)
+    
+    sorted_by_genre = []
+
+    for o in order:
+        index = o[0]
+        sorted_by_genre.append(candidates[index])
+    
+    return sorted_by_genre
+
+def filt_language(search, candidates, n, selected):
+    same_movies = same_language(search, candidates)
+
     r = len(same_movies)
 
     if  r <= n:
         # 언어가 일치하는 영화가 찾고자하는 추천 개수보다 적다면
 
-        # 해당 언어가 일치하는 영화는 평점 순으로 정렬해서 selected에 추가된다.
+        # 해당 언어가 일치하는 영화는 장르가 동일한 점수에 따라 정렬하여 선택군에 추가한다.
         sorted_same_languages = sort_by_vote_ave(same_movies)
+
+        # 같은 언어 영화끼리는 장르 순으로, 장르 점수까지 동일하다면, 평점으로 순위가 결정된다. 
+        sorted_same_languages = sort_by_genre_score(search, sorted_same_languages)
+        
         for movie in sorted_same_languages:
             selected.append(movie)
 
@@ -197,6 +220,9 @@ def filt_language(same_movies, candidates, n, selected):
 
         # 나머지는 전체 후보군에서 평점순으로 정렬 선택된다.
         sorted_left_candidates = sort_by_vote_ave(candidates)
+
+        # 나머지 영화안에서 장르 순으로, 장르 점수까지 동일하다면, 평점으로 순위를 결정한다.
+        sorted_left_candidates = sort_by_genre_score(search, sorted_left_candidates)
 
         for movie in sorted_left_candidates[0:n]:
             selected.append(movie)
@@ -211,12 +237,18 @@ def filt_language(same_movies, candidates, n, selected):
 
     return candidates,n
 
-def filt_series(same_movies, candidates, n, selected):
+def filt_series(search, candidates, n, selected):
+    same_movies = same_series(search, candidates)
+
     r = len(same_movies)
 
     if  r <= n:
         # 시리즈가 없거나, 찾고자 하는 개수보다 적으면, 그 목록을 평점 순으로 하여, 선택군에 추가한다.
         sorted_same_series = sort_by_vote_ave(same_movies)
+
+        # 같은 시리즈 중, 유사한 장르의 영화를 먼저 선택하고, 장르 점수가 같은 영화끼리는 평점으로 정렬한다.
+        sorted_same_series = sort_by_genre_score(search, sorted_same_series)
+
         for movie in sorted_same_series:
             selected.append(movie)
 
@@ -292,7 +324,7 @@ def stream_filter(search, data_file, n):
     ## filter same language
 
     same_languages_movies = same_language(search,candidates)
-    candidates,n = filt_language(same_languages_movies, candidates, n, selected)
+    candidates,n = filt_language(search, candidates, n, selected)
     same_language_cnt = len(candidates)
 
     if n == 0:
@@ -304,7 +336,7 @@ def stream_filter(search, data_file, n):
     ## find same series
 
     same_series_movies = same_series(search, candidates)
-    candidates,n = filt_series(same_series_movies, candidates, n, selected)
+    candidates,n = filt_series(search, candidates, n, selected)
 
     n_series_cnt = len(candidates)
     same_series_cnt = same_language_cnt - n_series_cnt
@@ -330,14 +362,19 @@ def stream_filter(search, data_file, n):
         print("filtered : ", filtered_genre)
         print("same score movies : ", len(candidates))
 
-    return candidates, n
+    return selected, candidates, n
 
 index = input("search movie index : ")
-search_movie = data_file[int(index)]
-candidates, selected_n = stream_filter(search_movie,data_file, 10)
+search = data_file[int(index)]
+selected, candidates, selected_n = stream_filter(search,data_file, 10)
 
-print("selected : ",selected_n)
+print("s",get_languages_by_line(search),get_series_by_line(search),get_genres_by_line(search), get_vote_ave_by_line(search))
 
-for line in candidates:
-    print(get_vote_ave_by_line(line))
+index = 0
+for line in selected:
+    print(index, get_languages_by_line(line),get_series_by_line(line),get_genres_by_line(line), get_vote_ave_by_line(line))
+    index+=1
+
+
+
 
