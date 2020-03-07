@@ -78,7 +78,7 @@ def vote_cnt(line):
         vote_cnt.append(vote_cnt(i))
     return vote_cnt
 
-## 
+##
 
 def isExist(main_set, compare_set):
     for feature in main_set:
@@ -273,14 +273,61 @@ def filt_genre(search, candidates, n, selected):
             candidates = top_score_list
             return candidates, n
 
-def stream_filter(search, data_file, n):
+def stream_filter(search, candidates, n):
     selected = []
+ 
+    print("number of data : ", len(candidates))
 
-    search_list = []
-    search_list.append(search)
+    ## 동일 언어 영화 선택
 
-    candidates = sub_list(data_file, search_list)
+    same_languages_movies = same_language(search,candidates)
+    candidates,n = filt_language(search, candidates, n, selected)
+    same_language_cnt = len(candidates)
 
+    if n == 0:
+        print("selecting complete")
+        candidates =[]
+        return selected,candidates
+    else:
+        print("same languages : ", same_language_cnt)
+        print("left_candidates  : ", same_language_cnt)
+
+    ## 동일 시리즈 영화 선택
+
+    same_series_movies = same_series(search, candidates)
+    candidates,n = filt_series(search, candidates, n, selected)
+
+    n_series_cnt = len(candidates)
+    same_series_cnt = same_language_cnt - n_series_cnt
+
+    if n == 0:
+        print("selecting complete")
+        candidates = []
+        return selected,candidates
+    else:
+        print("same series : ", same_series_cnt)
+        print("left candidates : ", n_series_cnt)
+
+    ## 유사 장르 영화 선택
+
+    candidates, n = filt_genre(search, candidates, n, selected)
+    filtered_genre =  n_series_cnt - len(candidates) 
+
+    if n == 0:
+        print("selecting complete")
+        candidates = []
+        return selected,candidates
+    else:
+        print("same genre : ", filtered_genre)
+        print("left candidates : ", len(candidates))
+
+    # 선택군과 남은 후보군 반환, 남은 선택 횟수는 n-len(selected)로 확인
+
+    return selected, candidates
+
+def stream_filter_withoutGenre(search, candidates, n):
+    selected = []
+ 
     print("number of data : ", len(candidates))
 
     ## 동일 언어 영화 선택
@@ -313,19 +360,6 @@ def stream_filter(search, data_file, n):
     else:
         print("same series : ", same_series_cnt)
         print("left candidates : ", n_series_cnt)
-
-    ## 유사 장르 언어 선택
-
-    candidates, n = filt_genre(search, candidates, n, selected)
-    filtered_genre = left_lots - n
-
-    if n == 0:
-        print("selecting complete")
-        candidates = []
-        return selected,candidates
-    else:
-        print("same genre : ", filtered_genre)
-        print("left candidates : ", len(candidates))
 
     # 선택군과 남은 후보군 반환, 남은 선택 횟수는 n-len(selected)로 확인
 

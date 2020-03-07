@@ -1,30 +1,3 @@
-"""
-0: adult
-1: siries
-2: buget
-3: genre
-4: homepage
-5: id
-6: imdb_id
-7: original lan
-8. original title
-9. overview
-10. popularity
-11. poster
-12. production company
-13. production lan
-14. release
-16. revenue
-17. runtime
-18. spoken lan
-19. status
-20. tag
-21. title
-22. video
-23. vote_ave
-24. vote_cnt
-"""
-
 data_hash ={
     'adult' :0,
     'series' : 1,
@@ -104,3 +77,29 @@ def vote_cnt(line):
     for i in predict_set:
         vote_cnt.append(vote_cnt(i))
     return vote_cnt
+
+def overview(line):
+    if len(line)-1 < data_hash['overview'] :
+        return ''
+
+    return line[data_hash['overview']]
+
+def title(line):
+    if len(line)-1 < data_hash['title'] :
+        return ''
+
+    return line[data_hash['title']]
+
+def get_overviews(set_movie):
+    overviews = []
+    for movie in set_movie:
+        overviews.append(overview(movie))
+
+    return overviews
+
+def get_titles(set_movie):
+    titles = []
+    for movie in set_movie:
+        titles.append(title(movie))
+
+    return titles
