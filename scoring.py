@@ -1,5 +1,6 @@
 import pandas as pd
 import csv
+import get_value
 
 meta_file_url_D = "C:/Users/luraw/OneDrive/Desktop/data/test_meta.csv"
 meta_file_url_L = "C:/Users/user/Desktop/data/test_meta.csv"
@@ -23,14 +24,9 @@ def temp_db_load(meta_url, rating_url):
 
     return meta_file, rating_file
 
-#meta_file, rating_file = temp_db_load(meta_file_url_L,rating_file_url_L)
 
-#meta_file = pd.read_csv(meta_file_url_D, engine='python')
-#meta_file = pd.read_csv(meta_file_url_D, low_memory= False)
-
-#meta_file = meta_file.head(20000)
-
-def similarites(search, candidates):
+## 코드에 사용될 유사도 반환 함수
+def similarites(search_overview, candidates_overviews):
     from numpy import dot
     from numpy.linalg import norm
     import numpy as np
@@ -39,14 +35,16 @@ def similarites(search, candidates):
 
     tfidf = TfidfVectorizer(stop_words='english')
 
-    candidates.insert(0,search)
+    candidates_overviews.insert(0,search_overview)
 
-    data_tfidf = tfidf.fit_transform(candidates)
+    data_tfidf = tfidf.fit_transform(candidates_overviews)
 
     similarities =  data_tfidf.toarray()[0] * data_tfidf[1:,].T
 
+
     return similarities
 
+# tfidf 공부
 def tfidf():
     from numpy import dot
     from numpy.linalg import norm
@@ -73,6 +71,7 @@ def tfidf():
     similarities = sorted(similarities, reverse=True)
     print(similarities)
 
+## linear_kernel 공부
 def overview_score(search, candidates):
     from sklearn.feature_extraction.text import TfidfVectorizer
     tfidf = TfidfVectorizer(stop_words='english')
@@ -83,6 +82,6 @@ def overview_score(search, candidates):
     from sklearn.metrics.pairwise import linear_kernel
     cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix)
 
-    sim_scores = list(enumerate(cosine_sim[12479]))
+    sim_scores = list(enumerate(cosine_sim[idx]))
 
     return list(cosine_sim)

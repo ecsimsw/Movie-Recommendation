@@ -24,6 +24,9 @@ def recommend(search, data_file, n):
     # n : 추천할 영화 개수를 메인 서버에서 결정해서 전달 받을 것
 
     # return : 추천할 n개의 영화
+
+    print("search : ",get_value.title(search))
+
     data = data_file[1:]
 
     index = input("search movie index : ")
@@ -31,72 +34,53 @@ def recommend(search, data_file, n):
 
     search_list = []
     search_list.append(search)
+
+    ## 데이터에서 검색군 제거
     candidates = filter.sub_list(data, search_list)
 
-    selected, candidates = filter.stream_filter_withoutGenre(search,candidates, n)
-
-    def test_filter_works(selected, search):
-        ## Test filter works 
-        print("s",get_value.languages(search),get_value.series(search),get_value.genres(search), get_value.vote_ave(search))
-        rank = 1
-        for line in selected:
-            print(rank, get_value.languages(line),get_value.series(line),get_value.genres(line), get_value.vote_ave(line))
-            rank+=1
+    ## 필터로 언어, 시리즈, 장르 유사를 확인
+    selected, candidates = filter.stream_filter(search,candidates, n)
 
     n = n - len(selected)
-
     score_list = []
 
-    print("search : ",get_value.title(search))
-    print("\n")
-    print("selected : ")
-
-    for s in selected:
-        print(get_value.title(s))
-
+    ## 필터에서 선택된 선택군의 내용 유사 점수를 계산하여 추가
 
     overview_search = get_value.overview(search)
+    s_overview_smi = scoring.similarites(overview_search, get_value.get_overviews(selected))
 
-    overview_smi = scoring.similarites(overview_search, get_value.get_overviews(selected))
+    for smi in s_overview_smi:
+        score_list.append(smi)
 
-    overview_smi = sorted(overview_smi, reverse=True)
-
-    for i in overview_smi:
-        print(i)
-
-    print("\n")
-    print("candidates : ")
+    ## 남은 후보군을 내용 유사도 계산 후 선택군에 추가
 
     overview_candidates =get_value.get_overviews(candidates)
-
     overview_smi = scoring.similarites(overview_search, overview_candidates)
-    #overview_smi = scoring.overview_score(overview_search,overview_candidates)
 
-    titles = get_value.get_titles(candidates)
+    ## 점수를 기준으로 정렬하여 선택군에 추가
 
-    temp = []
+    c_overview_smi = []
+    for index in range(len(candidates)):
+        temp = (index,overview_smi[index])
+        c_overview_smi.append(temp)
 
-    for o in range(len(titles)):
-        t = (titles[o],overview_smi[o])
-        temp.append(t)
+    sorted_c_overview_smi = sorted(c_overview_smi, key = lambda x : x[1], reverse =True)
 
-    temp = sorted(temp, key = lambda x : x[1], reverse =True)
+    for lot in range(n):
+        score_list.append(sorted_c_overview_smi[lot][1])
+        selected.append(candidates[lot])
 
-    for i in range(100):
-        print(temp[i])
+    ## 반환은 선택군과, 점수표를 반환
+    return selected, score_list
+
 
 data_temp = temp_db_load(meta_file_url_D)
 
-recommend("temp_search", data_temp[0:], 10)
 
-
-"""
-titles = get_value.get_titles(data_temp)
-
-i = 0 
-
-for i in range(len(titles)):
-    if titles[i] == "The Dark Knight Rise":
-        print(i)
-
-"""
+def test_filter_works(selected, search):
+    ## Test filter works 
+    print("s",get_value.languages(search),get_value.series(search),get_value.genres(search), get_value.vote_ave(search))
+    rank = 1
+    for line in selected:
+        print(rank, get_value.languages(line),get_value.series(line),get_value.genres(line), get_value.vote_ave(line))
+        rank+=1
