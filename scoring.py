@@ -73,3 +73,16 @@ def tfidf():
     similarities = sorted(similarities, reverse=True)
     print(similarities)
 
+def overview_score(search, candidates):
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    tfidf = TfidfVectorizer(stop_words='english')
+
+    candidates.insert(0,search)
+    tfidf_matrix = tfidf.fit_transform(candidates)
+
+    from sklearn.metrics.pairwise import linear_kernel
+    cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix)
+
+    sim_scores = list(enumerate(cosine_sim[12479]))
+
+    return list(cosine_sim)

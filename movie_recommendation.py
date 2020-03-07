@@ -33,7 +33,7 @@ def recommend(search, data_file, n):
     search_list.append(search)
     candidates = filter.sub_list(data, search_list)
 
-    selected, candidates = filter.stream_filter(search,candidates, n)
+    selected, candidates = filter.stream_filter_withoutGenre(search,candidates, n)
 
     def test_filter_works(selected, search):
         ## Test filter works 
@@ -47,12 +47,6 @@ def recommend(search, data_file, n):
 
     score_list = []
 
-    overview_search = get_value.overview(search)
-    overview_candidates =get_value.get_overviews(candidates)
-
-    overview_smi = scoring.similarites(overview_search, overview_candidates)
-
-    #batman_series 
     print("search : ",get_value.title(search))
     print("\n")
     print("selected : ")
@@ -60,18 +54,49 @@ def recommend(search, data_file, n):
     for s in selected:
         print(get_value.title(s))
 
+
+    overview_search = get_value.overview(search)
+
+    overview_smi = scoring.similarites(overview_search, get_value.get_overviews(selected))
+
+    overview_smi = sorted(overview_smi, reverse=True)
+
+    for i in overview_smi:
+        print(i)
+
     print("\n")
     print("candidates : ")
 
+    overview_candidates =get_value.get_overviews(candidates)
+
+    overview_smi = scoring.similarites(overview_search, overview_candidates)
+    #overview_smi = scoring.overview_score(overview_search,overview_candidates)
+
     titles = get_value.get_titles(candidates)
 
-    i =0
-    for o in overview_smi:
-        if o> 0.05:
-            if titles[i] != None:
-                print(titles[i])
-        i+=1
+    temp = []
+
+    for o in range(len(titles)):
+        t = (titles[o],overview_smi[o])
+        temp.append(t)
+
+    temp = sorted(temp, key = lambda x : x[1], reverse =True)
+
+    for i in range(100):
+        print(temp[i])
 
 data_temp = temp_db_load(meta_file_url_D)
 
-recommend("temp_search", data_temp, 10)
+recommend("temp_search", data_temp[0:], 10)
+
+
+"""
+titles = get_value.get_titles(data_temp)
+
+i = 0 
+
+for i in range(len(titles)):
+    if titles[i] == "The Dark Knight Rise":
+        print(i)
+
+"""
