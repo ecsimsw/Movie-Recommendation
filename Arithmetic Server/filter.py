@@ -364,3 +364,14 @@ def stream_filter_withoutGenre(search, candidates, n):
     # 선택군과 남은 후보군 반환, 남은 선택 횟수는 n-len(selected)로 확인
 
     return selected, candidates
+
+
+
+## for test
+def test_filter_works(selected, search):
+    ## Test filter works 
+    print("s",get_value.languages(search),get_value.series(search),get_value.genres(search), get_value.vote_ave(search))
+    rank = 1
+    for line in selected:
+        print(rank, get_value.languages(line),get_value.series(line),get_value.genres(line), get_value.vote_ave(line))
+        rank+=1
