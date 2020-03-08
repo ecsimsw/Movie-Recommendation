@@ -6,6 +6,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.io.IOException;
+import java.net.*;
+import java.io.*;
+import java.net.UnknownHostException;
 
 @RestController
 @SpringBootApplication
@@ -17,6 +21,59 @@ public class HelloController {
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(HelloController.class, args);
+        //SpringApplication.run(HelloController.class, args);
+
+        sendDataFile();
+    }
+
+    public static void sendDataFile(){
+        String ip = "127.0.0.1";
+        int port = 7777;
+        Socket socket = null;
+        ServerSocket server = null;  //서버 생성을 위한 ServerSocket
+
+        try{
+            server = new ServerSocket(port);
+            System.out.println("Accept : wait for client...");
+            socket = server.accept();
+
+            InetAddress inetaddr = socket.getInetAddress();
+            System.out.println("Connect : "+ inetaddr.getHostAddress());
+
+            OutputStream out = socket.getOutputStream();
+            InputStream in = socket.getInputStream();
+
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+
+            String c_msg = br.readLine();
+
+            System.out.println("Received : " + c_msg);
+
+            if(c_msg.equals("client_ready")){
+                System.out.println("\n=== client ready ===");
+            }
+
+            String s_msg = "server_ready";
+
+            bw.write(s_msg);
+            bw.flush();
+
+            System.out.println("Send : " + s_msg);
+
+            c_msg = br.readLine();
+
+            System.out.println("Received : " + c_msg);
+
+            if(c_msg.equals("client_ACK")){
+                System.out.println("\n=== download start ===");
+            }
+
+            socket.close();
+            server.close();
+
+        } catch(IOException e){
+            e.printStackTrace();
+        }
     }
 }

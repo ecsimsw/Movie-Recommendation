@@ -3,36 +3,36 @@ import socket
 def data_read_by_socket():
     # 접속 정보 설정
     ip = '127.0.0.1'
-    port = 8080
+    port = 7777
     size = 1024
     sever_addrs = (ip, port)
 
     data = bytearray(b'')
 
-    # 클라이언트 소켓 설정
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as c:
-        c.connect(sever_addrs) 
-        
-        c.send('client_ready'.encode())
-        
-        while True:
-            data = c.recv(size)  
-            if data != None:
-                break
-                
-        if data == b"server_ready":
-            f_size = c.recv(1024)
-            c.send("c_ack".encode())
-            
-            print("=== file down loading ===")
-            with open('C:/Users/luraw/OneDrive/Desktop/db/saved.csv', 'w', encoding="UTF-8") as f:
-                data = c.recv(int(f_size.decode()))
-                f.write(data.decode())
-        
-        print('데이터 수신: {}'.format(str(data)))     
+        try:
+            c.connect((ip,port))
+            print("Connect ", ip)
+
+            c_msg = bytes("client_ready\n", 'UTF-8')
+            ## '\n' 빠트리지 않게, 서버에서 \n을 기다린다.
+
+            c.send(c_msg)
+
+            s_msg = c.recv(1024).decode()
+
+            if s_msg == "server_ready":
+                print("\n=== server_ready ===")
+                c.send(bytes("client_ACK\n", 'UTF-8'))
+
+                print("\n=== down start ===")
+
+        except Exception as e:
+            print(e)
+    
     return data
 
 
-a = data_read_by_socket()
+result = data_read_by_socket()
 
-print(a)
+#print(a)
