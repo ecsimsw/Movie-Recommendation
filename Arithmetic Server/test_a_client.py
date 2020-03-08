@@ -1,5 +1,7 @@
 import socket
 
+db_url = "C:/Users/luraw/OneDrive/Desktop/db/test.csv"
+
 def data_read_by_socket():
     # 접속 정보 설정
     ip = '127.0.0.1'
@@ -12,7 +14,7 @@ def data_read_by_socket():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as c:
         try:
             c.connect((ip,port))
-            print("Connect ", ip)
+            print(">> Connect ", ip)
 
             c_msg = bytes("client_ready\n", 'UTF-8')
             ## '\n' 빠트리지 않게, 서버에서 \n을 기다린다.
@@ -22,14 +24,25 @@ def data_read_by_socket():
             s_msg = c.recv(1024).decode()
 
             if s_msg == "server_ready":
-                print("\n=== server_ready ===")
+                print("\n>> server_ready")
                 c.send(bytes("client_ACK\n", 'UTF-8'))
 
-                print("\n=== down start ===")
+                print("\n>> down start")
+                
+                with open(db_url, mode="a", encoding='utf8',errors = 'ignore') as f:
+                    while True:
+                        data = c.recv(1024).decode(errors='ignore')
+                        
+                        if data.find("!download_end") != -1:
+                            data = data.replace("!download_end", "")
+                            f.write(data)
+                            print(" \n>> download end")
+                            break
+                        
+                        f.write(data)
 
         except Exception as e:
             print(e)
-    
     return data
 
 

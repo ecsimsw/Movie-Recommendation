@@ -9,6 +9,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.io.IOException;
 import java.net.*;
 import java.io.*;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import java.net.UnknownHostException;
 
 @RestController
@@ -27,6 +35,7 @@ public class HelloController {
     }
 
     public static void sendDataFile(){
+        String url_temp = "C:\\Users\\luraw\\OneDrive\\Desktop\\data\\movies_metadata.csv";
         String ip = "127.0.0.1";
         int port = 7777;
         Socket socket = null;
@@ -67,12 +76,40 @@ public class HelloController {
 
             if(c_msg.equals("client_ACK")){
                 System.out.println("\n=== download start ===");
+
+                fileSender(url_temp, bw);
+                bw.write("\n");
+                bw.flush();
+                bw.write("!download_end");
+                bw.flush();
+
+                System.out.println("\n=== download end ===");
             }
 
             socket.close();
             server.close();
-
         } catch(IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    public static void fileSender(String url, BufferedWriter bw ){
+        BufferedReader reader = null;
+
+        try{
+            reader = new BufferedReader(new FileReader(url));
+
+            //Charset.forName("UTF-8");
+            String line = "";
+
+            while((line = reader.readLine())!=null){
+
+                bw.write(line+"\n");
+                bw.flush();
+            }
+        }catch(FileNotFoundException e){
+            e.printStackTrace();
+        }catch(IOException e) {
             e.printStackTrace();
         }
     }
