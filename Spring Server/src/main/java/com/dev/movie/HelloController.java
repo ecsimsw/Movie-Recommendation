@@ -24,7 +24,7 @@ import java.net.UnknownHostException;
 public class HelloController {
     static String url_temp = "C:\\Users\\luraw\\OneDrive\\Desktop\\data\\movies_metadata.csv";
     static String ip = "127.0.0.1";
-    static int port = 7777;
+    static int port = 8080;
     static Socket socket = null;
     static ServerSocket server = null;  //서버 생성을 위한 ServerSocket
     static OutputStream out = null;
@@ -32,20 +32,21 @@ public class HelloController {
 
     static BufferedWriter bw = null;
     static BufferedReader br = null;
+    static ArrayList<String> lines;
+    static String html;
 
     @RequestMapping("/movie")
     public String index() {
-        return "Hello World! Sobin.";
+        return "index";
     }
 
     public static void main(String[] args) {
-        //SpringApplication.run(HelloController.class, args);
-
         handshake();
         sendDataFile();
 
         // get search_title
 
+        System.out.println("");
         System.out.println("=== send search title ===");
         sendMsg("Heat");
 
@@ -56,15 +57,21 @@ public class HelloController {
         if(msg.equals("send_result")){
             System.out.println("=== download result ===");
 
-            recieveResult(lines);
+            receiveResult(lines);
         }
 
-        for ( String line : lines) {
-            System.out.println(line);
+        StringBuilder sb = new StringBuilder();
+
+        for (String s : lines) {
+            sb.append(s+"\n");
         }
+        html = sb.toString();
 
-        serverClose();
 
+
+        socketClose();
+
+        SpringApplication.run(HelloController.class, args);
     }
 
     public static boolean handshake(){
@@ -136,13 +143,12 @@ public class HelloController {
         return false;
     }
 
-    public static void recieveResult(ArrayList<String> lines){
+    public static void receiveResult(ArrayList<String> lines){
         String msg ="";
 
         try {
             while (!((msg = br.readLine()).equals("!download_end"))) {
                 lines.add(msg);
-                System.out.println(msg);
             }
         }catch(IOException e){
             e.printStackTrace();
@@ -198,7 +204,7 @@ public class HelloController {
         return c_msg;
     }
 
-    public static void serverClose(){
+    public static void socketClose(){
         try{
             socket.close();
             server.close();
@@ -206,6 +212,33 @@ public class HelloController {
             System.out.println("=== close ===");
         }catch(IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void writeFile(){
+        String message = "This is a sample message.\n";
+
+        File file = new File("test1.txt");
+        FileWriter writer = null;
+
+        try {
+            // 기존 파일의 내용에 이어서 쓰려면 true를, 기존 내용을 없애고 새로 쓰려면 false를 지정한다.
+            writer = new FileWriter("C:\\Users\\luraw\\git_Repository\\movie_recommend\\movieRecommendation\\Spring Server\\src\\main\\resources\\templates\\index.html", true);
+
+            for ( String s: lines) {
+                writer.write(s+'\n');
+                writer.flush();
+            }
+
+            System.out.println("DONE");
+        } catch(IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if(writer != null) writer.close();
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

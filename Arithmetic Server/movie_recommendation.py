@@ -94,7 +94,7 @@ def refine_data(string):
 def print_result(number, movie, lines):
     title = get_value.title(movie)
     temp_line = str(number)+"."+ title
-    print(temp_line)
+    #print(temp_line)
 
     lines.append(temp_line)
     
@@ -102,7 +102,7 @@ def print_result(number, movie, lines):
     languages = refine_data(languages)
     
     temp_line = "languages : " + languages
-    print(temp_line)
+    #print(temp_line)
 
     lines.append(temp_line)
     
@@ -110,7 +110,7 @@ def print_result(number, movie, lines):
     genres = get_value.genres_name(movie)
     genres = refine_data(genres)
     temp_line = "genres : " + genres
-    print(temp_line)
+    #print(temp_line)
 
     lines.append(temp_line)
 
@@ -118,7 +118,7 @@ def print_result(number, movie, lines):
     series = refine_data(series)
     if series != "":
         temp_line = "series : " + series
-        print(temp_line)
+        #print(temp_line)
 
         lines.append(temp_line)
         
@@ -127,7 +127,7 @@ def print_result(number, movie, lines):
 
     if companies != "":
         temp_line = "companies : " + companies
-        print(temp_line)
+        #print(temp_line)
 
         lines.append(temp_line)
 
@@ -136,7 +136,7 @@ def print_result(number, movie, lines):
 
     if overview != "":
         temp_line = "overview : "+ overview
-        print(temp_line)
+        #print(temp_line)
 
         lines.append(temp_line)
 
@@ -145,13 +145,13 @@ def print_result(number, movie, lines):
 
     if vote_ave != "":
         temp_line = "vote_ave : "+ vote_ave
-        print(temp_line)
+        #print(temp_line)
 
         lines.append(temp_line)
 
 
     temp_line =""
-    print(temp_line)
+    #print(temp_line)
     
     lines.append(temp_line)
 
@@ -160,13 +160,13 @@ def make_html(search, selected):
 
     temp_line = "[search]"
     lines.append(temp_line)
-    print(temp_line)
+    #print(temp_line)
 
     print_result("S", search, lines)
 
     temp_line = "[selected]"
     lines.append(temp_line)
-    print(temp_line)
+    #print(temp_line)
 
     for top in range(len(selected)):
         print_result(top+1, selected[top], lines)
@@ -214,9 +214,6 @@ if __name__ == "__main__":
         selected, score_list = recommend(search, data_file, n)
 
         result_lines = make_html(search, selected)
-
-        for i in result_lines:
-            print(i)
 
     # 추천 영화 목록을 spring 서버에 전송
     socket_connection.send_result_lines(result_lines)

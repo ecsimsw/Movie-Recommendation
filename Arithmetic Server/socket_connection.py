@@ -1,7 +1,7 @@
 import socket
 
 ip = '127.0.0.1'
-port = 7777
+port = 8080
 version = 0
 size = 1024
 data = bytearray(b'')
