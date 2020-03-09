@@ -26,7 +26,6 @@ def input_title_to_search(search_title,data_movies):
             return data_movies[index]
 
     if search_index == -1:
-        print("No data")
         return None
         ## 영화가 데이터에 없음 
     
@@ -173,15 +172,29 @@ def make_html(search, selected):
 
     return lines
 
+#version = socket_connection.get_file_version()
+
+#version check()
+
+#rcv_file_url = socket_connection.get_file_data()
+
 rcv_data = file_load(rcv_file_url_L)
 
 data_file = rcv_data[1:]
 
+#rcv_search_string = file_load(rcv)
+
 search = input_title_to_search(rcv_search_string, data_file)
 
-selected, score_list = recommend(search, data_file, 10)
+if search == None:
+    print("=== NO DATA ===")
 
-html_lines = make_html(search, selected)
+else: 
+    selected, score_list = recommend(search, data_file, 10)
 
-for i in html_lines:
-    print(i)
+    recommendation_lines = make_html(search, selected)
+
+    for i in recommendation_lines:
+        print(i)
+
+#send_recommendation_lines()
