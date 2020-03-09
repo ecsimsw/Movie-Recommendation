@@ -1,12 +1,13 @@
 import csv
+import sys
 
 import filter
 import get_value
 import scoring
-
-import socket
+import socket_connection
 
 rcv_file_url_L = "C:/Users/user/Desktop/data/get.csv"
+rcv_file_url_D = "C:/Users/luraw/OneDrive/Desktop/db/test.csv"
 
 def file_load(url):
     data_file =[]
@@ -28,7 +29,7 @@ def input_title_to_search(search_title,data_movies):
     if search_index == -1:
         return None
         ## 영화가 데이터에 없음 
-    
+
 def recommend(search, data_movies, n, Mode= "G"):
     # search : 찾을 영화를 웹에서 입력해서 전달 받을 것
     # data_file = 영화 메타 데이터 정보를 DB에서 전달 받을 것
@@ -153,7 +154,7 @@ def print_result(number, movie, lines):
     print(temp_line)
     
     lines.append(temp_line)
-   
+
 def make_html(search, selected):
     lines = []
 
@@ -172,29 +173,59 @@ def make_html(search, selected):
 
     return lines
 
-#version = socket_connection.get_file_version()
+db = "C:/Users/luraw/OneDrive/Desktop/db/db.csv"
+n =10
 
-#version check()
+if __name__ == "__main__":
 
-#rcv_file_url = socket_connection.get_file_data()
+    # Spring server 연결
+    if socket_connection.connect() == False:
+        print("connection Error")
+        sys.exit(1)
 
-rcv_data = file_load(rcv_file_url_L)
+    # 버젼과 캐시데이터 구현 추가 필요
+    # version = socket_connection.get_file_version()
+    # version check()
 
-data_file = rcv_data[1:]
+    # meta_data를 db에 저장, db에서 load
+    db_url = socket_connection.file_receive(db)
+    db_data = file_load(db_url)
 
-#rcv_search_string = file_load(rcv)
+    data_file = db_data[1:]
 
-search = input_title_to_search(rcv_search_string, data_file)
+    # 추천 영화 수보다 데이터 수가 더 적으면 n을 데이터 수-1로. -> escape index out of range
+    if len(data_file) < n:
+        n = len(data_file)-1
 
-if search == None:
-    print("=== NO DATA ===")
+    # 영화 제목 입력 받음
+    rcv_search_string = socket_connection.msg_receive() 
 
-else: 
-    selected, score_list = recommend(search, data_file, 10)
+    # 영화 제목을 meta_data에서 찾아서 line 추출
+    search = input_title_to_search(rcv_search_string, data_file)
+    """  
+    for index in range(len(data_file)):
+        print(get_value.title(data_file[index]))
 
-    recommendation_lines = make_html(search, selected)
+        if search_title == get_value.title(data_file[index]):
+            print("founD!!")
+    """
 
-    for i in recommendation_lines:
-        print(i)
+    # 추천 과정
+    result_lines = []
 
-#send_recommendation_lines()
+    if search == None:
+        print("=== NO DATA ===")
+        result_lines.append("=== NO DATA ===")
+        sys.exit(1)
+
+    else:
+        selected, score_list = recommend(search, data_file, n)
+
+        result_lines = make_html(search, selected)
+
+        for i in result_lines:
+            print(i)
+
+    #send_recommendation_lines()
+
+
