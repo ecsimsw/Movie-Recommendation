@@ -24,8 +24,6 @@ def data_receive():
 
             s_msg = c.recv(1024).decode() #sever ready
 
-
-
             if s_msg == "server_ready":
                 print("\n>> server_ready")
                 c.send(bytes("client_ACK\n", 'UTF-8'))
@@ -46,7 +44,6 @@ def data_receive():
 
         except Exception as e:
             print(e)
+    
     return data
 
-
-result = data_read_by_socket()
