@@ -177,7 +177,6 @@ db = "C:/Users/luraw/OneDrive/Desktop/db/db.csv"
 n =10
 
 if __name__ == "__main__":
-
     # Spring server 연결
     if socket_connection.connect() == False:
         print("connection Error")
@@ -198,17 +197,10 @@ if __name__ == "__main__":
         n = len(data_file)-1
 
     # 영화 제목 입력 받음
-    rcv_search_string = socket_connection.msg_receive() 
+    rcv_search_string = socket_connection.msg_receive()
 
     # 영화 제목을 meta_data에서 찾아서 line 추출
     search = input_title_to_search(rcv_search_string, data_file)
-    """  
-    for index in range(len(data_file)):
-        print(get_value.title(data_file[index]))
-
-        if search_title == get_value.title(data_file[index]):
-            print("founD!!")
-    """
 
     # 추천 과정
     result_lines = []
@@ -226,6 +218,9 @@ if __name__ == "__main__":
         for i in result_lines:
             print(i)
 
-    #send_recommendation_lines()
+    # 추천 영화 목록을 spring 서버에 전송
+    socket_connection.send_result_lines(result_lines)
 
+    # 소켓 close
+    socket_connection.socket_close()
 

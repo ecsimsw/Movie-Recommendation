@@ -6,7 +6,7 @@ version = 0
 size = 1024
 data = bytearray(b'')
 
-db_url = "C:/Users/luraw/OneDrive/Desktop/db/meta_data.csv"
+test_db_url = "C:/Users/luraw/OneDrive/Desktop/db/meta_data.csv"
 
 sever_addrs = (ip, port)
 c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -34,7 +34,7 @@ def connect():
 
     return True
 
-def file_receive(db_url = db_url):
+def file_receive(db_url = test_db_url):
     rcv_file = []
     try:
         print("\n>> down start")
@@ -61,6 +61,13 @@ def file_receive(db_url = db_url):
 
     return db_url
 
+def send_result_lines(lines):
+    msg_send("send_result")
+
+    for i in lines:
+        msg_send(i)
+    msg_send("!download_end")
+
 def msg_receive():
     s_msg = c.recv(1024).decode()
 
@@ -71,14 +78,30 @@ def msg_send(msg):
     ## '\n' 빠트리지 않게!!, 데이터 받을 때 끝을 표시하는거 잊지말기.
     c.send(c_msg)
 
-def server_close():
+def socket_close():
     c.close()
+    print("socket close")
 
 """
+##test 
+
+lines = []
+
+string = "1.Sudden Death\
+languages : en\
+genres : Action, Adventure, Thriller\
+companies : Universal Pictures, Imperial Entertainment, Signature Entertainment\
+overview : International action superstar Jean Claude Van Damme teams with Powers Boothe in a Tension-packed, suspe\
+during a championship hockey game. With the captors demanding a billion dollars by games end, Van Damme frantically\
+vote_ave : 5.5"
+
+for i in range(10):
+    lines.append(string)
+
 connect()
 file_receive()
 
-data = msg_receive()
+title = msg_receive()
 
-print(data)
+send_result_lines(lines)
 """

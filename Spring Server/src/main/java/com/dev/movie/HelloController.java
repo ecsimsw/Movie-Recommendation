@@ -49,6 +49,20 @@ public class HelloController {
         System.out.println("=== send search title ===");
         sendMsg("Heat");
 
+        String msg = rcvMsg();
+
+        ArrayList<String> lines = new ArrayList<String>();
+
+        if(msg.equals("send_result")){
+            System.out.println("=== download result ===");
+
+            recieveResult(lines);
+        }
+
+        for ( String line : lines) {
+            System.out.println(line);
+        }
+
         serverClose();
 
     }
@@ -122,6 +136,19 @@ public class HelloController {
         return false;
     }
 
+    public static void recieveResult(ArrayList<String> lines){
+        String msg ="";
+
+        try {
+            while (!((msg = br.readLine()).equals("!download_end"))) {
+                lines.add(msg);
+                System.out.println(msg);
+            }
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+    }
+
     public static void fileSender(String url, BufferedWriter bw ){
         BufferedReader reader = null;
 
@@ -159,6 +186,16 @@ public class HelloController {
             return false;
         }
         return true;
+    }
+
+    public static String rcvMsg(){
+        String c_msg= "";
+        try {
+             c_msg = br.readLine();
+        } catch(IOException e){
+            e.printStackTrace();
+        }
+        return c_msg;
     }
 
     public static void serverClose(){
