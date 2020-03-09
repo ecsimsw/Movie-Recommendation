@@ -53,10 +53,28 @@ def find_value_tag(string, char_tag, pad_lan, char_last= None, data_lan =None):
     return value
 
 def genres(line):
+    if len(line)-1 < data_hash['genres'] :
+        return ''
+
     return find_value_tag(line[data_hash['genres']], 'id', 3, char_last=',')
 
+def genres_name(line):
+    if len(line)-1 < data_hash['genres'] :
+        return ''
+
+    return find_value_tag(line[data_hash['genres']], 'name', 4, char_last='\'}')
+
 def series(line):
+    if len(line)-1 < data_hash['series'] :
+        return ''
+
     return find_value_tag(line[data_hash['series']], 'id', 3, char_last=',')
+
+def series_name(line):
+    if len(line)-1 < data_hash['series'] :
+        return ''
+
+    return find_value_tag(line[data_hash['series']], 'name', 5, char_last='\',')
 
 def languages(line):
     if len(line)-1 < data_hash['spoken_language'] :
@@ -65,18 +83,28 @@ def languages(line):
     return find_value_tag(line[data_hash['spoken_language']], 'iso_639_1', pad_lan=4, data_lan=2)
 
 def company(line):
+    if len(line)-1 < data_hash['production_company'] :
+        return ''
+
     return find_value_tag(line[data_hash['production_company']], 'id', pad_lan=3, char_last='}')
 
+def company_name(line):
+    if len(line)-1 < data_hash['production_company'] :
+        return ''
+
+    return find_value_tag(line[data_hash['production_company']], 'name', pad_lan=4, char_last='\',')
+
 def vote_ave(line):
+    if len(line)-1 < data_hash['vote_ave'] :
+        return ''
+
     return line[data_hash['vote_ave']]
 
 def vote_cnt(line):
-    return line[data_hash['vote_cnt']]
+    if len(line)-1 < data_hash['vote_cnt'] :
+        return ''
 
-    vote_cnt = []
-    for i in predict_set:
-        vote_cnt.append(vote_cnt(i))
-    return vote_cnt
+    return line[data_hash['vote_cnt']]
 
 def overview(line):
     if len(line)-1 < data_hash['overview'] :

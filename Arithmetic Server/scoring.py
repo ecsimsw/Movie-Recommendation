@@ -2,29 +2,6 @@ import pandas as pd
 import csv
 import get_value
 
-meta_file_url_D = "C:/Users/luraw/OneDrive/Desktop/data/test_meta.csv"
-meta_file_url_L = "C:/Users/user/Desktop/data/test_meta.csv"
-
-rating_file_url_D = "C:/Users/luraw/OneDrive/Desktop/data/test_ratings.csv"
-rating_file_url_L = "C:/Users/user/Desktop/data/test_ratings.csv"
-
-def temp_db_load(meta_url, rating_url):
-    meta_file =[]
-    rating_file = []
-
-    with open(meta_url, mode='r', encoding='utf8', errors='ignore') as f:
-        csv_ = csv.reader(f)
-        for i in csv_:
-            meta_file.append(i)
-
-    with open(rating_url, mode='r', encoding='utf8', errors='ignore') as f:
-        csv_ = csv.reader(f)
-        for i in csv_:
-            rating_file.append(i)
-
-    return meta_file, rating_file
-
-
 ## 코드에 사용될 유사도 반환 함수
 def similarites(search_overview, candidates_overviews):
     from numpy import dot

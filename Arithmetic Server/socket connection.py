@@ -44,8 +44,3 @@ def data_read_by_socket():
         except Exception as e:
             print(e)
     return data
-
-
-result = data_read_by_socket()
-
-#print(a)
