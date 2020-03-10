@@ -1,0 +1,70 @@
+movie.jsp  (가장 첫 페이지)
+----------------
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+ <html>
+ <head> 
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> 
+	<title>Hello Movie Engine</title>
+	 <style> 
+	h1 {
+	  font-size: 16pt; 
+	  background: #AAFFAA; 
+	  padding: 5px; } 
+	</style>
+ </head>
+ <body>
+	 <h1>I CAN RECOMMEND !</h1>
+	 <p id="msg">당신이 가장 좋아하는 영화는 ?</p> 
+	<form method="post" action="/hello.jsp"> 
+	<table>
+		 <tr> 
+		         <td>입력</td>
+		         <td><input type="text" id="text1" name="text1"></td> 
+		</tr>
+		 <tr> 
+		         <td></td>
+	                     <td><input type="submit" value="Click here" onclick='영화 추천중'></td>
+	             </tr>
+	 </table>
+	 </form>
+ </body>
+ </html>
+ 
+ 
+ ---------------------------
+ hello.jsp   (parameter 받아서 처리하는 jsp)
+ 
+ <%@ page language="java" contentType="text/html; charset=UTF-8"
+
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+ <html>
+ <head> 
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> 
+	<title>hello</title>
+
+ </head>
+ <body>
+<%
+    String str1 = request.getParameter("text1");
+
+    request.setAttribute("sendMsg", str1);
+    RequestDispatcher dispatcher = request.getRequestDispatcher("success.jsp");
+    dispatcher.forward(request, response); 
+%>
+</body>
+</html>
+
+------------------------------------
+succss.jsp (hello.jsp 결과를 출력하는 페이지)
+
+<%@page contentType="text/html; charset=UTF-8"%>
+<HTML>
+    <HEAD><TITLE>제발..</TITLE></HEAD>
+    <BODY>
+        입력된 제목: <%= request.getParameter("sendMsg") %>
+    </BODY>
+</HTML>
