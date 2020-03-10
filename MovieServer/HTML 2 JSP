@@ -1,0 +1,54 @@
+movie.html
+------------------------------
+
+<!DOCTYPE html>
+ <html>
+ <head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"> 
+	<title>Hello Movie Engine</title>
+	 <style> 
+	h1 {
+	  font-size: 16pt; 
+	  background: #AAFFAA; 
+	  padding: 5px; } 
+	</style>
+ </head>
+ <body>
+	 <h1>I CAN RECOMMEND !</h1>
+	 <p id="msg">당신이 가장 좋아하는 영화는 ?</p> 
+	<form method="post" action="session.jsp"> 
+	<table>
+		 <tr> 
+		         <td>입력</td>
+		         <td><input type="text" id="text1" name="text1"></td> 
+		</tr>
+		 <tr> 
+		         <td></td>
+	                     <td><input type="submit" value="Click here" ></td>
+	             </tr>
+	 </table>
+	 </form>
+ </body>
+ </html>
+
+
+--------------------------------------------------------------
+
+session.jsp
+---------------------
+<%@page contentType="text/html" pageEncoding="UTF-8"%> 
+<!DOCTYPE html> 
+<html> 
+<head>
+<title>Passing the input value to a session variable</title>
+</head>
+<body> 
+<% 
+String uname=request.getParameter("inputname"); 
+out.print("Welcome "+ uname);
+session.setAttribute("sessname",uname); 
+%> 
+<a href="output.jsp">Check Output Page Here </a>
+</body> 
+</html>
+
