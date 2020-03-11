@@ -34,13 +34,12 @@
 function move() {
 
     var title = document.getElementById("title").value;
-    alert(title);
+    alert("search movie : "+title);
     var url = "/result?title="+title;
     
     alert("move to :"+url)
     
     location.href=url;
-    
     
 }
 </script>

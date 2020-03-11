@@ -2,9 +2,15 @@
 package com.dev.movie;
 
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.GetMapping;
+
 
 import java.io.IOException;
 import java.net.*;
@@ -26,7 +32,7 @@ public class HelloController {
     static String ip = "127.0.0.1";
     static int port = 8080;
     static Socket socket = null;
-    static ServerSocket server = null;  //서버 생성을 위한 ServerSocket
+    static ServerSocket server = null;  //�꽌踰� �깮�꽦�쓣 �쐞�븳 ServerSocket
     static OutputStream out = null;
     static InputStream in = null;
 
@@ -35,11 +41,17 @@ public class HelloController {
     static ArrayList<String> lines;
     static String html;
 
-    @RequestMapping("/movie")
-    public String index() {
-        return "index";
+    
+    @RequestMapping("/movie") 
+    public String jsp(){
+       return "movie";
     }
-
+    
+    @GetMapping("/result")  
+    public String getParameters(@RequestParam String title){
+        System.out.println(title);
+    	return "result";
+   
     public static void main(String[] args) {
         handshake();
         sendDataFile();
@@ -222,7 +234,7 @@ public class HelloController {
         FileWriter writer = null;
 
         try {
-            // 기존 파일의 내용에 이어서 쓰려면 true를, 기존 내용을 없애고 새로 쓰려면 false를 지정한다.
+            // 湲곗〈 �뙆�씪�쓽 �궡�슜�뿉 �씠�뼱�꽌 �벐�젮硫� true瑜�, 湲곗〈 �궡�슜�쓣 �뾾�븷怨� �깉濡� �벐�젮硫� false瑜� 吏��젙�븳�떎.
             writer = new FileWriter("C:\\Users\\luraw\\git_Repository\\movie_recommend\\movieRecommendation\\Spring Server\\src\\main\\resources\\templates\\index.html", true);
 
             for ( String s: lines) {
