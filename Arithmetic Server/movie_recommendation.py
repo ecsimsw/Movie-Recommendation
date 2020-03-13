@@ -177,8 +177,17 @@ db = "C:/Users/luraw/OneDrive/Desktop/db/db.csv"
 n =10
 
 if __name__ == "__main__":
-    # Spring server 연결
-    if socket_connection.connect() == False:
+    ip = '127.0.0.1'
+    port = 8888
+
+    ### 연산 서버는 시작되면 최초 한번 DB를 받고, 연결이 끊김
+    # 다시 연결되서 부터는 더 이상 종료 없이 제목만 받아 연산 처리
+    # -> 소켓 서버가 연결된 상태에서 DB를 받고, spring app을 run 한 후, 앞선 소켓 서버를 사용하려면 중복된 ip라고 연결 종료.
+
+    ## 연산 서버 시작 시 -> DB 저장
+    # Spring server와 연산
+    client_socket=socket_connection.connect(ip, port)
+    if (client_socket)== False:
         print("connection Error")
         sys.exit(1)
 
@@ -187,7 +196,14 @@ if __name__ == "__main__":
     # version check()
 
     # meta_data를 db에 저장, db에서 load
-    db_url = socket_connection.file_receive(db)
+    print("=== receive data ===")
+    db_url = socket_connection.file_receive(client_socket, db)
+
+    socket_connection.msg_send(client_socket,"download_end")
+
+    #socket_connection.socket_close(client_socket)
+
+    print("=== load file ===")
     db_data = file_load(db_url)
 
     data_file = db_data[1:]
@@ -196,28 +212,39 @@ if __name__ == "__main__":
     if len(data_file) < n:
         n = len(data_file)-1
 
-    # 영화 제목 입력 받음
-    rcv_search_string = socket_connection.msg_receive()
+    ## DB 저장되면, 연결을 끊었다가 재연결해서 이때 부턴 서버에서 보낸 데이터를 처리
 
-    # 영화 제목을 meta_data에서 찾아서 line 추출
-    search = input_title_to_search(rcv_search_string, data_file)
+    client_socket = None
+    while True:
+        client_socket = socket_connection.connect(ip, port)
+        if client_socket == True:
+            break
 
-    # 추천 과정
-    result_lines = []
+    while True:
+        print("\n=== wait for title === ")
 
-    if search == None:
-        print("=== NO DATA ===")
-        result_lines.append("=== NO DATA ===")
-        sys.exit(1)
+        # 영화 제목 입력 받음
+        rcv_search_string = socket_connection.msg_receive(client_socket) ## title
 
-    else:
-        selected, score_list = recommend(search, data_file, n)
+        # 영화 제목을 meta_data에서 찾아서 line 추출
+        search = input_title_to_search(rcv_search_string, data_file)
 
-        result_lines = make_html(search, selected)
+        # 추천 과정
+        result_lines = []
 
-    # 추천 영화 목록을 spring 서버에 전송
-    socket_connection.send_result_lines(result_lines)
+        if search == None:
+            print("=== NO DATA ===")
+            result_lines.append("=== NO DATA ===")
+            sys.exit(1)
+
+        else:
+            selected, score_list = recommend(search, data_file, n)
+
+            result_lines = make_html(search, selected)
+
+        # 추천 영화 목록을 spring 서버에 전송
+        socket_connection.send_result_lines(client_socket,result_lines)
 
     # 소켓 close
-    socket_connection.socket_close()
+    socket_connection.socket_close(client_socket)
 

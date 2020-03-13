@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.web.bind.annotation.GetMapping;
 
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
 import java.net.*;
 import java.io.*;
 
@@ -25,69 +28,98 @@ import java.util.List;
 @Controller 
 @SpringBootApplication
 public class Application {
-    static String url_temp = "C:\\Users\\luraw\\OneDrive\\Desktop\\data\\movies_metadata.csv";
-    static String url_result_jsp = "C:\\Users\\luraw\\git\\movie_recommendation\\Spring_server\\src\\main\\webapp\\WEB-INF\\jsp\\result.jsp";
-    // 이건 db로 바꿀거고
-    
-    static String ip = "127.0.0.1";
-    static int port = 8080;
-    static Socket socket = null;
-    static ServerSocket server = null; 
-    static OutputStream out = null;
-    static InputStream in = null;
-
-    static BufferedWriter bw = null;
-    static BufferedReader br = null;
-    static ArrayList<String> lines;
-    
+	
+	public static String ip = "127.0.0.1";
+	public static int port = 8888;
+     
     @RequestMapping("/movie") 
     public String jsp(){
        return "movie";
     }
     
+    @RequestMapping("/hello")
+	public String function() {
+		return "hello";
+	}
+    
     @GetMapping("/result")  
-    public String getParameters(@RequestParam String title){
+    public String getParameters(@RequestParam String title) {
+    	// 연산 추천, 추천 영화들 정보를 jsp, 그걸 출력
         System.out.println(title);
         String RcvTitle = title;
         
-        get_rcm_arithmeticServer(RcvTitle);
+        ConnetArithmeticServer a_server = new ConnetArithmeticServer(ip,port);
+      
+	    ArrayList<String> lines = a_server.getRecommendation(RcvTitle);
+        makeJspFile(lines); 
         
-    	return "result";
+        return "result"; 
     }    
     
     public static void main(String[] args) {
-    
-    SpringApplication.run(Application.class, args);
-    
+    	SpringApplication.run(Application.class, args); 
     }
     
-    // 클래스로 따로 빼는게 나은거 같음. 변수랑
-    public static void get_rcm_arithmeticServer(String rcvdTitle) {
-    	handshake();
-        sendDataFile();
+	static public void makeJspFile(ArrayList<String> lines) {
+		String url_result_jsp = "C:\\Users\\luraw\\git\\movie_recommendation\\Spring_server\\src\\main\\webapp\\WEB-INF\\jsp\\result.jsp";
+		  
+		 try {
+		        String filePath = url_result_jsp; 
+		        
+		        FileWriter fw = new FileWriter(filePath);
+		        
+		        for(String line : lines) {
+		        	fw.write(line+"\n");
+		        }
+		       
+		       fw.close(); 
+		       System.out.println("\n=== jsp complete ===");
+		 
+		 } catch (Exception e) {
+			e.getStackTrace();
+		    }
+	}
+}
 
-        // get search_title
-
-        System.out.println("");
-        System.out.println("=== send search title ===");
-        sendMsg(rcvdTitle);
-
-        String msg = rcvMsg();
-
-        ArrayList<String> lines = new ArrayList<String>();
-
-        if(msg.equals("send_result")){
-            System.out.println("=== download result ===");
-
-            receiveResult(lines);
-        }
-
-        makeFile(lines);
-
-        socketClose();
-    }
-    
-	public static boolean handshake(){
+class ConnetArithmeticServer{
+	String ip;
+	int port;
+	
+	Socket socket = null;
+	ServerSocket server = null; 
+	OutputStream out = null;
+	InputStream in = null;
+	
+	BufferedWriter bw = null;
+	BufferedReader br = null;
+	ArrayList<String> lines;
+	
+	public ConnetArithmeticServer(String ip, int port) {
+		this.ip = ip;
+		this.port = port;
+		
+		handshake();
+	}
+	
+	public ArrayList<String> getRecommendation(String rcvdTitle){
+		System.out.println("");
+		System.out.println("=== send search title ===");
+		sendMsg(rcvdTitle);
+		
+		String msg = rcvMsg();
+		
+		ArrayList<String> lines = new ArrayList<String>();
+		
+		if(msg.equals("send_result")){
+		System.out.println("\n=== download result ===");
+		
+		    receiveResult(lines);
+		}	
+		
+		return lines;
+	}
+	
+	public boolean handshake(){
 	    try {
 	        server = new ServerSocket(port);
 	        System.out.println("Accept : wait for client...");
@@ -132,7 +164,7 @@ public class Application {
 	    return false;
 	}
 	
-	public static boolean sendDataFile(){
+	public boolean sendDataFile(String file_url){
 	    try{
 	        String c_msg;
 	        c_msg = br.readLine();
@@ -142,7 +174,7 @@ public class Application {
 	        if(c_msg.equals("down_start")){
 	            System.out.println("\n=== download start ===");
 	
-	            fileSender(url_temp, bw);
+	            fileSender(file_url, bw);
 	
 	            System.out.println("\n=== download end ===");
 	        }
@@ -156,19 +188,7 @@ public class Application {
 	    return false;
 	}
 	
-	public static void receiveResult(ArrayList<String> lines){
-	    String msg ="";
-	
-	    try {
-	        while (!((msg = br.readLine()).equals("!download_end"))) {
-	            lines.add(msg);
-	        }
-	    }catch(IOException e){
-	        e.printStackTrace();
-	    }
-	}
-	
-	public static void fileSender(String url, BufferedWriter bw ){
+	public void fileSender(String url, BufferedWriter bw ){
 	    BufferedReader reader = null;
 	
 	    try{
@@ -194,7 +214,7 @@ public class Application {
 	    }
 	}
 	
-	public static boolean sendMsg(String msg){
+	public boolean sendMsg(String msg){
 	    try{
 	        bw.write(msg);
 	        bw.flush();
@@ -207,7 +227,7 @@ public class Application {
 	    return true;
 	}
 	
-	public static String rcvMsg(){
+	public String rcvMsg(){
 	    String c_msg= "";
 	    try {
 	         c_msg = br.readLine();
@@ -217,34 +237,28 @@ public class Application {
 	    return c_msg;
 	}
 	
-	public static void socketClose(){
-	    try{
-	        socket.close();
-	        server.close();
+	public void receiveResult(ArrayList<String> lines){
+	    String msg ="";
 	
-	        System.out.println("=== close ===");
-	    }catch(IOException e) {
+	    try {
+	        while (!((msg = br.readLine()).equals("!download_end"))) {
+	            lines.add(msg);
+	        }
+	    }catch(IOException e){
 	        e.printStackTrace();
 	    }
 	}
 	
-	public static void makeFile(ArrayList<String> lines) {
-		 try {
-		       // 바이트 단위로 파일읽기
-		        String filePath = url_result_jsp; 
-		        
-		        FileWriter fw = new FileWriter(filePath);
-		        
-		        for(String line : lines) {
-		        	fw.write(line+"\n");
-		        }
-		       
-		       fw.close(); //스트림 닫기
-		       System.out.println("\n=== jsp complete ===");
-		 
-		 } catch (Exception e) {
-			e.getStackTrace();
-		    }
+	public void socketClose(){
+	    try{
+	        socket.close();
+	        server.close();
+	
+	        System.out.println("\n=== socket close ===");
+	    }catch(IOException e) {
+	        e.printStackTrace();
+	    }
 	}
+
 }
     
