@@ -13,7 +13,6 @@
 	request.setCharacterEncoding("UTF-8");
     String str1 = request.getParameter("text1");
     request.setAttribute("sendMsg", str1);
-    System.out.println("======"+str1);
     RequestDispatcher dispatcher = request.getRequestDispatcher("result.jsp");
     dispatcher.forward(request, response); 
 %>

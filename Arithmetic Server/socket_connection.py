@@ -23,9 +23,8 @@ def connect(ip, port):
             client_socket.send(bytes("client_ACK\n", 'UTF-8'))
 
     except Exception as e:
-        print(e)
         client_socket.close()
-        return False
+        return None
 
     return client_socket
 
@@ -34,7 +33,7 @@ def file_receive(client_socket, db_url):
         print("\n>> down start")
         client_socket.send(bytes("down_start\n", 'UTF-8'))
 
-        with open(db_url, mode="a", encoding='utf8',errors = 'ignore') as f:
+        with open(db_url, mode="w", encoding='utf8',errors = 'ignore') as f:
             while True:
                 data = client_socket.recv(1024).decode(errors='ignore')
 
@@ -54,11 +53,12 @@ def file_receive(client_socket, db_url):
     return db_url
 
 def send_result_lines(client_socket, lines):
-    msg_send("send_result")
+    msg_send(client_socket,"send_result")
 
     for i in lines:
-        msg_send(i)
-    msg_send("!download_end")
+        msg_send(client_socket,i)
+    
+    msg_send(client_socket, "!download_end")
 
 def msg_receive(client_socket):
     while True:

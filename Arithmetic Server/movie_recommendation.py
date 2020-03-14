@@ -187,7 +187,7 @@ if __name__ == "__main__":
     ## 연산 서버 시작 시 -> DB 저장
     # Spring server와 연산
     client_socket=socket_connection.connect(ip, port)
-    if (client_socket)== False:
+    if (client_socket)== None:
         print("connection Error")
         sys.exit(1)
 
@@ -201,26 +201,29 @@ if __name__ == "__main__":
 
     socket_connection.msg_send(client_socket,"download_end")
 
-    #socket_connection.socket_close(client_socket)
-
     print("=== load file ===")
     db_data = file_load(db_url)
 
     data_file = db_data[1:]
 
+    socket_connection.msg_send(client_socket,"fileLoad_end")
+
+    socket_connection.socket_close(client_socket)
+    
     # 추천 영화 수보다 데이터 수가 더 적으면 n을 데이터 수-1로. -> escape index out of range
     if len(data_file) < n:
         n = len(data_file)-1
 
     ## DB 저장되면, 연결을 끊었다가 재연결해서 이때 부턴 서버에서 보낸 데이터를 처리
 
-    client_socket = None
     while True:
-        client_socket = socket_connection.connect(ip, port)
-        if client_socket == True:
-            break
+        print("=== wait for connection ===")
+        client_socket = None
+        while True:
+            client_socket = socket_connection.connect(ip, port)
+            if client_socket != None:
+                break
 
-    while True:
         print("\n=== wait for title === ")
 
         # 영화 제목 입력 받음
@@ -235,7 +238,6 @@ if __name__ == "__main__":
         if search == None:
             print("=== NO DATA ===")
             result_lines.append("=== NO DATA ===")
-            sys.exit(1)
 
         else:
             selected, score_list = recommend(search, data_file, n)
@@ -245,6 +247,7 @@ if __name__ == "__main__":
         # 추천 영화 목록을 spring 서버에 전송
         socket_connection.send_result_lines(client_socket,result_lines)
 
-    # 소켓 close
-    socket_connection.socket_close(client_socket)
+         # 소켓 close
+        socket_connection.socket_close(client_socket)
+
 

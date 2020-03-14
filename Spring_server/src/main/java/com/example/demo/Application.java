@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+
 import java.net.*;
 import java.io.*;
 
@@ -28,10 +29,12 @@ import java.util.List;
 @Controller 
 @SpringBootApplication
 public class Application {
-	
+	public static String url_temp = "C:\\Users\\luraw\\OneDrive\\Desktop\\data\\movies_metadata.csv";
 	public static String ip = "127.0.0.1";
+	public static int port_webPage = 8080;
 	public static int port = 8888;
      
+	
     @RequestMapping("/movie") 
     public String jsp(){
        return "movie";
@@ -53,13 +56,37 @@ public class Application {
 	    ArrayList<String> lines = a_server.getRecommendation(RcvTitle);
         makeJspFile(lines); 
         
+        a_server.socketClose();
         return "result"; 
     }    
     
+    /*
+	
+	@RequestMapping("/movie")
+	public String jsp() {
+		return "movie";
+	}
+	
+	@RequestMapping("/hello")
+	public String function(@RequestParam String text1) {
+		// 연산 추천, 추천 영화들 정보를 jsp, 그걸 출력
+        System.out.println(text1);
+        String RcvTitle = text1;
+        
+        ConnetArithmeticServer a_server = new ConnetArithmeticServer(ip,port);
+      
+	    ArrayList<String> lines = a_server.getRecommendation(RcvTitle);
+        makeJspFile(lines); 
+        
+        a_server.socketClose();
+        return "result"; 
+	}
+    */
+	
     public static void main(String[] args) {
     	SpringApplication.run(Application.class, args); 
     }
-    
+   
 	static public void makeJspFile(ArrayList<String> lines) {
 		String url_result_jsp = "C:\\Users\\luraw\\git\\movie_recommendation\\Spring_server\\src\\main\\webapp\\WEB-INF\\jsp\\result.jsp";
 		  
@@ -68,9 +95,25 @@ public class Application {
 		        
 		        FileWriter fw = new FileWriter(filePath);
 		        
+		        fw.write("<%@ page language=\"java\" contentType=\"text/html; charset=UTF-8\"\r\n" + 
+		        		"\r\n" + 
+		        		"    pageEncoding=\"UTF-8\"%>");
+		        fw.write("<!DOCTYPE html>\r\n" + 
+		        		" <html>\r\n" + 
+		        		" \r\n" + 
+		        		"\r\n" + 
+		        		" <head> \r\n" + 
+		        		"   <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> \r\n" + 
+		        		"   <title>Hello Movie Engine</title>\r\n" + 
+		        		" </head>\r\n" + 
+		        		" <body>");
+		        
 		        for(String line : lines) {
-		        	fw.write(line+"\n");
+		        	fw.write(line+"<br>");
 		        }
+		        
+		        fw.write("</body>"+
+		        		"</html>");
 		       
 		       fw.close(); 
 		       System.out.println("\n=== jsp complete ===");
@@ -224,6 +267,7 @@ class ConnetArithmeticServer{
 	        e.printStackTrace();
 	        return false;
 	    }
+
 	    return true;
 	}
 	
@@ -234,6 +278,7 @@ class ConnetArithmeticServer{
 	    } catch(IOException e){
 	        e.printStackTrace();
 	    }
+	
 	    return c_msg;
 	}
 	

@@ -74,7 +74,7 @@ def series_name(line):
     if len(line)-1 < data_hash['series'] :
         return ''
 
-    return find_value_tag(line[data_hash['series']], 'name', 5, char_last='\',')
+    return find_value_tag(line[data_hash['series']], 'name', 4, char_last='\',')
 
 def languages(line):
     if len(line)-1 < data_hash['spoken_language'] :
