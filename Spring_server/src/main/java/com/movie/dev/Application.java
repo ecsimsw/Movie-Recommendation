@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.movie.dev;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -29,69 +29,50 @@ import java.util.List;
 @Controller 
 @SpringBootApplication
 public class Application {
-	public static String url_temp = "C:\\Users\\luraw\\OneDrive\\Desktop\\data\\movies_metadata.csv";
+	public static String data_url = "C:\\Users\\luraw\\OneDrive\\Desktop\\data\\movies_metadata.csv";
+	public static String cacheFolder_url = "C:\\Users\\luraw\\git\\movie_recommendation\\Spring_server\\src\\main\\webapp\\WEB-INF\\jsp\\cache\\";
+	
 	public static String ip = "127.0.0.1";
 	public static int port_webPage = 8080;
 	public static int port = 8888;
      
-	
     @RequestMapping("/movie") 
     public String jsp(){
        return "movie";
     }
     
-    @RequestMapping("/hello")
-	public String function() {
-		return "hello";
-	}
-    
     @GetMapping("/result")  
     public String getParameters(@RequestParam String title) {
-    	// 연산 추천, 추천 영화들 정보를 jsp, 그걸 출력
         System.out.println(title);
-        String RcvTitle = title;
         
-        ConnetArithmeticServer a_server = new ConnetArithmeticServer(ip,port);
-      
-	    ArrayList<String> lines = a_server.getRecommendation(RcvTitle);
-        makeJspFile(lines); 
+        String result_jsp;
         
-        a_server.socketClose();
-        return "result"; 
+        if(isFileExists(cacheFolder_url+title+".jsp")) {
+        	// There is cache data arleady
+        	result_jsp = cacheFolder_url+title+".jsp";
+        }
+        
+        else {
+		  String RcvTitle = title;
+		  ConnetArithmeticServer a_server = new ConnetArithmeticServer(ip,port);
+		
+		  ArrayList<String> lines = a_server.getRecommendation(RcvTitle);
+		  result_jsp = makeJspFile(title,lines); 
+		  a_server.socketClose();
+        }
+        
+        return result_jsp; 
     }    
-    
-    /*
-	
-	@RequestMapping("/movie")
-	public String jsp() {
-		return "movie";
-	}
-	
-	@RequestMapping("/hello")
-	public String function(@RequestParam String text1) {
-		// 연산 추천, 추천 영화들 정보를 jsp, 그걸 출력
-        System.out.println(text1);
-        String RcvTitle = text1;
-        
-        ConnetArithmeticServer a_server = new ConnetArithmeticServer(ip,port);
-      
-	    ArrayList<String> lines = a_server.getRecommendation(RcvTitle);
-        makeJspFile(lines); 
-        
-        a_server.socketClose();
-        return "result"; 
-	}
-    */
 	
     public static void main(String[] args) {
     	SpringApplication.run(Application.class, args); 
     }
    
-	static public void makeJspFile(ArrayList<String> lines) {
-		String url_result_jsp = "C:\\Users\\luraw\\git\\movie_recommendation\\Spring_server\\src\\main\\webapp\\WEB-INF\\jsp\\result.jsp";
-		  
+	static public String makeJspFile(String title, ArrayList<String> lines) {
+		 String url_cache = cacheFolder_url+title+".jsp";
+		
 		 try {
-		        String filePath = url_result_jsp; 
+		        String filePath = url_cache; 
 		        
 		        FileWriter fw = new FileWriter(filePath);
 		        
@@ -121,189 +102,17 @@ public class Application {
 		 } catch (Exception e) {
 			e.getStackTrace();
 		    }
+	
+	return url_cache;
+	}
+
+	static public boolean isFileExists(String file_url) {
+		File file = new File(file_url); 
+		boolean isExists = file.exists(); 
+		
+		return isExists;
 	}
 }
 
-class ConnetArithmeticServer{
-	String ip;
-	int port;
-	
-	Socket socket = null;
-	ServerSocket server = null; 
-	OutputStream out = null;
-	InputStream in = null;
-	
-	BufferedWriter bw = null;
-	BufferedReader br = null;
-	ArrayList<String> lines;
-	
-	public ConnetArithmeticServer(String ip, int port) {
-		this.ip = ip;
-		this.port = port;
-		
-		handshake();
-	}
-	
-	public ArrayList<String> getRecommendation(String rcvdTitle){
-		System.out.println("");
-		System.out.println("=== send search title ===");
-		sendMsg(rcvdTitle);
-		
-		String msg = rcvMsg();
-		
-		ArrayList<String> lines = new ArrayList<String>();
-		
-		if(msg.equals("send_result")){
-		System.out.println("\n=== download result ===");
-		
-		    receiveResult(lines);
-		}	
-		
-		return lines;
-	}
-	
-	public boolean handshake(){
-	    try {
-	        server = new ServerSocket(port);
-	        System.out.println("Accept : wait for client...");
-	        socket = server.accept();
-	
-	        InetAddress inetaddr = socket.getInetAddress();
-	        System.out.println("Connect : " + inetaddr.getHostAddress());
-	
-	        out = socket.getOutputStream();
-	        in = socket.getInputStream();
-	
-	        bw = new BufferedWriter(new OutputStreamWriter(out));
-	        br = new BufferedReader(new InputStreamReader(in));
-	
-	        String c_msg = br.readLine();
-	
-	        System.out.println("Received : " + c_msg);
-	
-	        if (c_msg.equals("client_ready")) {
-	            System.out.println("\n=== client ready ===");
-	        }
-	
-	        String s_msg = "server_ready";
-	
-	        bw.write(s_msg);
-	        bw.flush();
-	
-	        System.out.println("Send : " + s_msg);
-	
-	        c_msg = br.readLine();
-	
-	        System.out.println("Received : " + c_msg);
-	
-	        if(c_msg.equals("client_ACK")) {
-	            return true;
-	        }
-	
-	    } catch(IOException e){
-	        e.printStackTrace();
-	    }
-	
-	    return false;
-	}
-	
-	public boolean sendDataFile(String file_url){
-	    try{
-	        String c_msg;
-	        c_msg = br.readLine();
-	
-	        System.out.println("Received : " + c_msg);
-	
-	        if(c_msg.equals("down_start")){
-	            System.out.println("\n=== download start ===");
-	
-	            fileSender(file_url, bw);
-	
-	            System.out.println("\n=== download end ===");
-	        }
-	
-	
-	        return true;
-	
-	    } catch(IOException e){
-	        e.printStackTrace();
-	    }
-	    return false;
-	}
-	
-	public void fileSender(String url, BufferedWriter bw ){
-	    BufferedReader reader = null;
-	
-	    try{
-	        reader = new BufferedReader(new FileReader(url));
-	
-	        String line = "";
-	
-	        while((line = reader.readLine())!=null){
-	
-	            bw.write(line+"\n");
-	            bw.flush();
-	        }
-	
-	        bw.write("\n");
-	        bw.flush();
-	        bw.write("!download_end");
-	        bw.flush();
-	
-	    }catch(FileNotFoundException e){
-	        e.printStackTrace();
-	    }catch(IOException e) {
-	        e.printStackTrace();
-	    }
-	}
-	
-	public boolean sendMsg(String msg){
-	    try{
-	        bw.write(msg);
-	        bw.flush();
-	
-	        System.out.println("Send : " + msg);
-	    }catch(IOException e){
-	        e.printStackTrace();
-	        return false;
-	    }
 
-	    return true;
-	}
-	
-	public String rcvMsg(){
-	    String c_msg= "";
-	    try {
-	         c_msg = br.readLine();
-	    } catch(IOException e){
-	        e.printStackTrace();
-	    }
-	
-	    return c_msg;
-	}
-	
-	public void receiveResult(ArrayList<String> lines){
-	    String msg ="";
-	
-	    try {
-	        while (!((msg = br.readLine()).equals("!download_end"))) {
-	            lines.add(msg);
-	        }
-	    }catch(IOException e){
-	        e.printStackTrace();
-	    }
-	}
-	
-	public void socketClose(){
-	    try{
-	        socket.close();
-	        server.close();
-	
-	        System.out.println("\n=== socket close ===");
-	    }catch(IOException e) {
-	        e.printStackTrace();
-	    }
-	}
 
-}
-    

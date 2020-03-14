@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.movie.dev;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -22,7 +22,7 @@ public class InitialRun implements CommandLineRunner{
 
     	// will be changed to DB
     	
-	    a_server.sendDataFile(Application.url_temp);
+	    a_server.sendDataFile(Application.data_url);
 	    
 	    String checkFileSent = a_server.rcvMsg();
 	    
