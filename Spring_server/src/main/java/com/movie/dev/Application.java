@@ -43,13 +43,13 @@ public class Application {
     
     @GetMapping("/result")  
     public String getParameters(@RequestParam String title) {
-        System.out.println(title);
+        System.out.println("Title : "+title);
         
         String result_jsp;
         
-        if(isFileExists(cacheFolder_url+title+".jsp")) {
+        if(isFileExists(cacheFolder_url+title+".jsp")){
         	// There is cache data arleady
-        	result_jsp = cacheFolder_url+title+".jsp";
+        	result_jsp = "cache/"+title;
         }
         
         else {
@@ -61,6 +61,7 @@ public class Application {
 		  a_server.socketClose();
         }
         
+       
         return result_jsp; 
     }    
 	
@@ -69,10 +70,10 @@ public class Application {
     }
    
 	static public String makeJspFile(String title, ArrayList<String> lines) {
-		 String url_cache = cacheFolder_url+title+".jsp";
+		 String url_cache = cacheFolder_url+title+".jsp"; 
 		
 		 try {
-		        String filePath = url_cache; 
+		        String filePath = url_cache;
 		        
 		        FileWriter fw = new FileWriter(filePath);
 		        
@@ -103,7 +104,7 @@ public class Application {
 			e.getStackTrace();
 		    }
 	
-	return url_cache;
+	return "cache/"+title;
 	}
 
 	static public boolean isFileExists(String file_url) {
