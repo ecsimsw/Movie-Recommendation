@@ -26,7 +26,8 @@ import java.util.Arrays;
 import java.util.List;
 
 
-@Controller 
+//@RestController 
+@Controller
 @SpringBootApplication
 public class Application {
 	public static String data_url = "C:\\Users\\luraw\\OneDrive\\Desktop\\data\\movies_metadata.csv";
@@ -35,7 +36,9 @@ public class Application {
 	public static String ip = "127.0.0.1";
 	public static int port_webPage = 8080;
 	public static int port = 8888;
-     
+    
+	public static ArrayList<ThreadTest> threadList = new ArrayList<ThreadTest>();
+	
     @RequestMapping("/movie") 
     public String jsp(){
        return "movie";
@@ -57,6 +60,7 @@ public class Application {
 		  ConnetArithmeticServer a_server = new ConnetArithmeticServer(ip,port);
 		
 		  ArrayList<String> lines = a_server.getRecommendation(RcvTitle);
+		  
 		  result_jsp = makeJspFile(title,lines); 
 		  a_server.socketClose();
         }
@@ -65,10 +69,20 @@ public class Application {
         return result_jsp; 
     }    
 	
+    
+    @RequestMapping("/test")
+    public String test() {
+		ThreadTest t = new ThreadTest();
+		threadList.add(t);
+		t.start();
+		
+    	return Integer.toString(threadList.size());
+    }
+    
     public static void main(String[] args) {
     	SpringApplication.run(Application.class, args); 
     }
-   
+    
 	static public String makeJspFile(String title, ArrayList<String> lines) {
 		 String url_cache = cacheFolder_url+title+".jsp"; 
 		
@@ -115,5 +129,28 @@ public class Application {
 	}
 }
 
+class ThreadTest extends Thread
+{
+    public void run()
+    {
+    	
+        // 인터럽트 됬을때 예외처리
+        try
+        {
+            for(int i = 0 ; i <10  ; i++)
+            {
+                // 스레드 0.5초동안 대기
+                Thread.sleep(500);
+                System.out.println("Thread : " + i);
+            }
+            
+            Application.threadList.remove(this);
+            
+        }catch(InterruptedException e)
+        {
+            System.out.println(e);
+        }
+    }
+}
 
 

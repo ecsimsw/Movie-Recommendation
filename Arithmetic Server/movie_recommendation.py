@@ -1,13 +1,11 @@
 import csv
 import sys
+import threading
 
 import filter
 import get_value
 import scoring
 import socket_connection
-
-rcv_file_url_L = "C:/Users/user/Desktop/data/get.csv"
-rcv_file_url_D = "C:/Users/luraw/OneDrive/Desktop/db/test.csv"
 
 def file_load(url):
     data_file =[]
@@ -173,6 +171,24 @@ def make_html(search, selected):
 
     return lines
 
+def rcv_load_metaData(client_socket, db_url):
+    # 버젼과 캐시데이터 구현 추가 필요
+    # version = socket_connection.get_file_version()
+    # version check()
+
+    # meta_data를 db에 저장, db에서 load
+    file_url = socket_connection.file_receive(client_socket, db_url)
+
+    socket_connection.msg_send(client_socket,"download_end")
+
+    # 전달 받은 영화 데이터를 load / 소켓 종료
+    db_data = file_load(file_url)
+    data_file = db_data[1:]
+    socket_connection.msg_send(client_socket,"fileLoad_end")
+    socket_connection.socket_close(client_socket)
+
+    return data_file
+
 db = "C:/Users/luraw/OneDrive/Desktop/db/db.csv"
 n =10
 
@@ -191,30 +207,15 @@ if __name__ == "__main__":
         print("connection Error")
         sys.exit(1)
 
-    # 버젼과 캐시데이터 구현 추가 필요
-    # version = socket_connection.get_file_version()
-    # version check()
-
-    # meta_data를 db에 저장, db에서 load
     print("=== receive data ===")
-    db_url = socket_connection.file_receive(client_socket, db)
-
-    socket_connection.msg_send(client_socket,"download_end")
-
-    print("=== load file ===")
-    db_data = file_load(db_url)
-
-    data_file = db_data[1:]
-
-    socket_connection.msg_send(client_socket,"fileLoad_end")
-
-    socket_connection.socket_close(client_socket)
+    data_file = rcv_load_metaData(client_socket, db)
     
     # 추천 영화 수보다 데이터 수가 더 적으면 n을 데이터 수-1로. -> escape index out of range
     if len(data_file) < n:
         n = len(data_file)-1
 
     ## DB 저장되면, 연결을 끊었다가 재연결해서 이때 부턴 서버에서 보낸 데이터를 처리
+
 
     while True:
         print("=== wait for connection ===")

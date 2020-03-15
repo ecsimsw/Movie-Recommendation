@@ -2,7 +2,7 @@ package com.movie.dev;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-
+/*
 @Component
 public class InitialRun implements CommandLineRunner{
 	
@@ -39,3 +39,4 @@ public class InitialRun implements CommandLineRunner{
 	    System.out.println("\n=== request http ===");
     }
 }
+*/
