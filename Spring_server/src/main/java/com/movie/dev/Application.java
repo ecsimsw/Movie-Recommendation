@@ -37,17 +37,20 @@ public class Application {
 	public static int port_webPage = 8080;
 	public static int port = 8888;
     
+	
+	
 	public static ArrayList<ThreadTest> threadList = new ArrayList<ThreadTest>();
 	
     @RequestMapping("/movie") 
     public String jsp(){
        return "movie";
     }
-    
-    @GetMapping("/result")  
+   
+    @RequestMapping("/result")  
     public String getParameters(@RequestParam String title) {
         System.out.println("Title : "+title);
         
+        title = title.toLowerCase();
         String result_jsp;
         
         if(isFileExists(cacheFolder_url+title+".jsp")){
@@ -61,12 +64,18 @@ public class Application {
 		
 		  ArrayList<String> lines = a_server.getRecommendation(RcvTitle);
 		  
-		  result_jsp = makeJspFile(title,lines); 
+		  if(lines.get(0).equals("!None")) {
+			  result_jsp = "cache/NO_DATA";
+		  }
+		  else {
+			  result_jsp = makeJspFile(title,lines); 
+		  }
 		  a_server.socketClose();
         }
         
-       
+   
         return result_jsp; 
+   	
     }    
 	
     

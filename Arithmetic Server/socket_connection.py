@@ -66,7 +66,7 @@ def msg_receive(client_socket):
         if s_msg != "":
             break
 
-    print("rcved : ",s_msg)
+    print("rcved :",s_msg)
     return s_msg
 
 def msg_send(client_socket, msg):

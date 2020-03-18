@@ -53,9 +53,15 @@ def find_value_tag(string, char_tag, pad_lan, char_last= None, data_lan =None):
     return value
 
 def genres(line):
+    if len(line)-1 < data_hash['genres'] :
+      return ''
+    
     return find_value_tag(line[data_hash['genres']], 'id', 3, char_last=',')
 
 def series(line):
+    if len(line)-1 < data_hash['series'] :
+        return ''
+    
     return find_value_tag(line[data_hash['series']], 'id', 3, char_last=',')
 
 def languages(line):
@@ -140,6 +146,14 @@ def same_genre_score(search_line, compare_set):
     return score_set
 
 def sort_by_vote_ave(list2sort):
+    vote_ave_list = []
+
+    for item in list2sort:
+        try:
+            vote_ave_list.append(float(item[data_hash['vote_ave']]))
+        except ValueError:
+            return list2sort
+            
     return sorted(list2sort, key = lambda x : float(x[data_hash['vote_ave']]), reverse =True)
 
 def sort_by_genre_score(search, candidates):

@@ -20,7 +20,7 @@ def input_title_to_search(search_title,data_movies):
     search_index = -1
 
     for index in range(len(data_movies)):
-        if search_title == get_value.title(data_movies[index]):
+        if search_title.lower() == get_value.title(data_movies[index]).lower():
             search_index = index
             return data_movies[index]
 
@@ -100,7 +100,6 @@ def print_result(number, movie, lines):
     languages = refine_data(languages)
     
     temp_line = "languages : " + languages
-    #print(temp_line)
 
     lines.append(temp_line)
     
@@ -108,7 +107,6 @@ def print_result(number, movie, lines):
     genres = get_value.genres_name(movie)
     genres = refine_data(genres)
     temp_line = "genres : " + genres
-    #print(temp_line)
 
     lines.append(temp_line)
 
@@ -116,8 +114,6 @@ def print_result(number, movie, lines):
     series = refine_data(series)
     if series != "":
         temp_line = "series : " + series
-        #print(temp_line)
-
         lines.append(temp_line)
         
     companies = get_value.company_name(movie)
@@ -125,7 +121,6 @@ def print_result(number, movie, lines):
 
     if companies != "":
         temp_line = "companies : " + companies
-        #print(temp_line)
 
         lines.append(temp_line)
 
@@ -134,7 +129,6 @@ def print_result(number, movie, lines):
 
     if overview != "":
         temp_line = "overview : "+ overview
-        #print(temp_line)
 
         lines.append(temp_line)
 
@@ -143,13 +137,11 @@ def print_result(number, movie, lines):
 
     if vote_ave != "":
         temp_line = "vote_ave : "+ vote_ave
-        #print(temp_line)
 
         lines.append(temp_line)
 
 
     temp_line =""
-    #print(temp_line)
     
     lines.append(temp_line)
 
@@ -193,6 +185,7 @@ db = "C:/Users/luraw/OneDrive/Desktop/db/db.csv"
 n =10
 
 if __name__ == "__main__":
+
     ip = '127.0.0.1'
     port = 8888
 
@@ -231,19 +224,29 @@ if __name__ == "__main__":
         rcv_search_string = socket_connection.msg_receive(client_socket) ## title
 
         # 영화 제목을 meta_data에서 찾아서 line 추출
-        search = input_title_to_search(rcv_search_string, data_file)
+        search_line = input_title_to_search(rcv_search_string, data_file)
+
+        isDataLive = True
+
+        if search_line == None:
+            isDataLive = False
+
+        else:
+            if get_value.genres(search_line) == "" and get_value.languages(search_line) == "":
+                isDataLive = False
+                ## 변수명 리팩토링?? 시급!!!
 
         # 추천 과정
         result_lines = []
 
-        if search == None:
-            print("=== NO DATA ===")
-            result_lines.append("=== NO DATA ===")
+        if isDataLive:
+            selected, score_list = recommend(search_line, data_file, n)
+            result_lines = make_html(search_line, selected)
 
         else:
-            selected, score_list = recommend(search, data_file, n)
-
-            result_lines = make_html(search, selected)
+            # 데이터 에러
+            print("=== NO DATA ===")
+            result_lines.append("!None")
 
         # 추천 영화 목록을 spring 서버에 전송
         socket_connection.send_result_lines(client_socket,result_lines)
@@ -251,4 +254,4 @@ if __name__ == "__main__":
          # 소켓 close
         socket_connection.socket_close(client_socket)
 
-
+        
