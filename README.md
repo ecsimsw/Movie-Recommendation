@@ -1,7 +1,3 @@
-# movie_recommendation
-NLP / scikit-learn / spring boot 
-
-
 ## 영화 추천 서비스
 
   1. 공부한 자연어 처리를 연습 할 수 있는 간단한 서비스를 만들고 싶었습니다.  
