@@ -37,9 +37,9 @@
          
 ## 스크린샷
 
-![2](https://user-images.githubusercontent.com/46060746/84180459-7ca84000-aac2-11ea-90be-1b79fbbf1f2f.PNG)
+![2](screenShot2.PNG)
 
-![1](https://user-images.githubusercontent.com/46060746/84180468-7f0a9a00-aac2-11ea-8eea-15f4bb77f46e.PNG)
+![1](screenShot1.PNG)
 
 <br>
 
